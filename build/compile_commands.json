@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/lf/Documents/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EdgeDeviceManage_Slave/include -I/home/lf/Documents/EdgeDeviceManage_Slave/include/jsoncpp/include    -std=gnu++11 -o CMakeFiles/main.dir/src/a.cpp.o -c /home/lf/Documents/EdgeDeviceManage_Slave/src/a.cpp",
+  "file": "/home/lf/Documents/EdgeDeviceManage_Slave/src/a.cpp"
+},
+{
+  "directory": "/home/lf/Documents/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EdgeDeviceManage_Slave/include -I/home/lf/Documents/EdgeDeviceManage_Slave/include/jsoncpp/include    -std=gnu++11 -o CMakeFiles/main.dir/src/text.cpp.o -c /home/lf/Documents/EdgeDeviceManage_Slave/src/text.cpp",
+  "file": "/home/lf/Documents/EdgeDeviceManage_Slave/src/text.cpp"
+}
+]
