@@ -22,6 +22,7 @@ void startup(){
     Json::Reader rd;
     rd.parse(ifs,root);
 
+    //根据init文件绑定端口，连接服务器
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock < 0)
     {
@@ -48,6 +49,7 @@ void startup(){
         sleep(5);
     }
 
+    //初始化slave实例
     slave.sock = sock;
     slave.addr.sin_family = selfaddr.sin_family;
     slave.addr.sin_addr.s_addr = inet_addr(root["ip"].asCString());

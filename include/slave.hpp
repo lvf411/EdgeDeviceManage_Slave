@@ -20,6 +20,9 @@
 #include <vector>
 #include "list.hpp"
 
+#define SLAVE_STATUS_ORIGINAL           0
+#define SLAVE_STATUS_FILERECV_REQ_RECV  100
+
 //子任务间结果传递
 struct SubTaskResult{
     int client_id;                      //对应前驱和后继被分配的从节点ID
@@ -52,6 +55,9 @@ struct Slave{
     struct Task *next_task;             //下一个执行的子任务
     std::map<int, struct sockaddr_in> work_slave_addr;          //按照客户端编号存储的正在运行的所有客户端节点地址信息
     int status;                         //从节点此时所处的状态
+    int file_trans_listen_sock;         //从节点监听的数据接收文件描述符
+    int file_trans_port;                //文件接收文件描述符绑定的监听端口
+    int file_trans_connect_sock;        //从节点接收的主节点连接的文件描述符
 };   
 
 #endif //__SLAVE_HPP
