@@ -5,6 +5,8 @@
 #include "msg_type.hpp"
 #include "file.hpp"
 #include <thread>
+#include <mutex>
+#include <sstream>
 
 #define MSG_BUFFER_SIZE 1024
 

@@ -9,5 +9,7 @@
 #define MSG_TYPE_FILESEND_CANCEL 3
 //发送内容指示接收端收到了发送端进行的文件传输socket连接，打开了协商的文件准备好接收文件内容
 #define MSG_TYPE_FILESEND_START 4
+//发送内容指示接收端收到的文件的传输结果
+#define MSG_TYPE_FILESEND_RES 5
 
 #endif //__MSG_TYPE_HPP

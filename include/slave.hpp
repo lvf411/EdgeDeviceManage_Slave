@@ -20,8 +20,9 @@
 #include <vector>
 #include "list.hpp"
 
-#define SLAVE_STATUS_ORIGINAL           0
-#define SLAVE_STATUS_FILERECV_REQ_RECV  100
+#define SLAVE_STATUS_ORIGINAL               0
+#define SLAVE_STATUS_FILERECV_REQ_RECV      100
+#define SLAVE_STATUS_FILERECV_WAIT_CONN     101
 
 //子任务间结果传递
 struct SubTaskResult{
