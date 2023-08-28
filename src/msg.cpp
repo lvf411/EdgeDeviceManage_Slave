@@ -1,12 +1,13 @@
 #include "msg.hpp"
 
 #define ListenPortStart 10000
-#define ListenPortEnd   10020
+#define ListenPortEnd   10100
 
 extern Slave slave;
 FileTransInfo current_file_trans_info;
 int file_recv_status = FILE_RECV_STATUS_NONE;
 extern char SizeUnit[5];
+extern list_head file_req_list;
 
 //获取随机的可用端口
 int getRandAvaliPort()
@@ -29,6 +30,35 @@ int getRandAvaliPort()
     return -1;
 }
 
+//检查文件是否为关键文件，若是则解包并更新系统信息
+bool key_file_check(std::string fname)
+{
+    static std::string slave_subtask_sync_fname;
+    static bool initflag = false;
+    if(!initflag)
+    {
+        std::ofstream f;
+        std::stringstream ss;
+        ss << slave.slave_id << "_subtask_list.json";
+        slave_subtask_sync_fname = ss.str();
+        initflag = true;
+    }
+
+    if(fname.compare(slave_subtask_sync_fname) == 0)
+    {
+        client_task_list_descfile_parse_and_update(fname);
+    }
+    else if(fname.compare("work_client_list.json") == 0)
+    {
+        work_client_list_descfile_parse_and_update(fname);
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
 //接收文件传输socket连接线程
 void file_trans_socket_accept()
 {
@@ -40,7 +70,12 @@ void file_trans_socket_accept()
         if(slave.file_trans_connect_sock >= 0)
         {
             //成功接收文件传输发送方连接
-            //打开文件，接收数据
+            //打开文件，接收数据，若文件存在则先清空文件内容
+            if(isFileExists(current_file_trans_info.info.fname))
+            {
+                std::ofstream ofstrunc(current_file_trans_info.info.fname, std::ios::trunc);
+                ofstrunc.close();
+            }
             std::ofstream ofs(current_file_trans_info.info.fname, std::ios::binary | std::ios::app);
             std::string res_md5;
             std::thread file_recv_threadID(file_recv, slave.file_trans_connect_sock, current_file_trans_info.info, ofs, std::ref(res_md5));
@@ -86,12 +121,21 @@ void file_trans_socket_accept()
             ss.str("");
             ss << fw.write(root);
             send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
-            //关闭文件传输监听与连接文件描述符
+            //关闭文件传输连接文件描述符
             close(slave.file_trans_connect_sock);
             slave.file_trans_connect_sock = -1;
             close(slave.file_trans_listen_sock);
             slave.file_trans_listen_sock = -1;
             slave.status = SLAVE_STATUS_ORIGINAL;
+
+            //检查文件是否为关键文件，若是则解包并更新系统信息
+            if(!key_file_check(current_file_trans_info.info.fname))
+            {
+                //不是关键文件，检查是否为其他节点传来的前驱结果文件
+
+                //其他，普通文件
+            }
+            break;
         }
     }
 }
@@ -111,11 +155,11 @@ void msg_send()
         {
             //获取待接收文件的信息后获取空闲端口，建立监听
             int randport = getRandAvaliPort();
-            bool flag = true;        //发送同意请求标志
+            bool file_trans_allow_flag = true;        //发送同意请求标志
             if(randport < 0)
             {
-                //获取随机端口失败
-                flag = false;
+                //获取随机端口失败，不接收文件
+                file_trans_allow_flag = false;
             }
             else
             {
@@ -145,14 +189,16 @@ void msg_send()
                     exit(3);
                 }
                 //创建线程接收来自主节点的连接
-
-                flag = true;
+                slave.file_trans_threadID = std::thread(file_trans_socket_accept);
+                //可以接收文件
+                file_trans_allow_flag = true;
             }
             Json::Value root;
             root["type"] = Json::Value(MSG_TYPE_FILESEND_REQ_ACK);
             root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
             root["src_port"] = Json::Value(ntohs(slave.addr.sin_port));
-            if(flag == false)
+            root["fname"] = Json::Value(current_file_trans_info.info.fname);
+            if(file_trans_allow_flag == false)
             {
                 root["ret"] = Json::Value(false);
                 Json::FastWriter fw;
@@ -229,10 +275,55 @@ void msg_recv()
                 }
                 break;
             }
+            case MSG_TYPE_FILEREQ_ACK:
+            {
+                int ret = root["ret"].asInt();
+                if(ret == FILEREQ_ACK_WAIT)
+                {
+                    //主节点正忙，等待后重新请求，将文件请求重新加入请求链表中
+                    FileReqNode *req_node = new FileReqNode();
+                    req_node->fname = root["fname"].asString();
+                    req_node->self = LIST_HEAD_INIT(req_node->self);
+                    req_node->head = file_req_list;
+                    list_add_tail(&req_node->self, &req_node->head);
+                }
+            }
             default:
             {
                 break;
             }
         }
+    }
+}
+
+void peerS_msg_send(PeerNode *peer)
+{
+    while(1)
+    {
+
+    }
+}
+
+void peerS_msg_recv(PeerNode peer)
+{
+    while(1)
+    {
+
+    }
+}
+
+void peerC_msg_send(PeerNode *peer)
+{
+    while(1)
+    {
+
+    }
+}
+
+void peerC_msg_recv(PeerNode peer)
+{
+    while(1)
+    {
+
     }
 }

@@ -12,4 +12,19 @@
 //发送内容指示接收端收到的文件的传输结果
 #define MSG_TYPE_FILESEND_RES 5
 
+//发送内容为从节点向主节点的文件请求
+#define MSG_TYPE_FILEREQ_REQ 11
+//发送内容为主节点对从节点的文件请求的应答
+#define MSG_TYPE_FILEREQ_ACK 12
+    //应答内容为同意
+    #define FILEREQ_ACK_OK 0
+    //应答内容为等待后重新发送请求
+    #define FILEREQ_ACK_WAIT 1
+    //应答内容为请求文件错误，拒绝
+    #define FILEREQ_ACK_ERROR 2
+
+//发送内容为从节点子任务执行情况上报
+#define MSG_TYPE_SUBTASK_RESULT 21
+
+
 #endif //__MSG_TYPE_HPP

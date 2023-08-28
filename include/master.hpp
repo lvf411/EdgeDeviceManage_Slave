@@ -38,7 +38,7 @@ struct SubTaskNode{
 };
 
 //客户端链表节点
-struct ClientNode{
+struct PeerNode{
     int client_id;                      //设备编号
     int sock;                           //与客户端通信的文件描述符
     struct sockaddr_in addr;            //客户端的地址信息

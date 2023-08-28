@@ -3,7 +3,7 @@
 extern Master master;
 extern list_head free_client_list, work_client_list, deployed_task_list, uninit_task_list;
 extern std::mutex mutex_slave_list;
-extern std::map<int, ClientNode *> free_client_list_map, work_client_list_map;
+extern std::map<int, PeerNode *> free_client_list_map, work_client_list_map;
 
 int task_increment_id = 0;
 std::mutex mutex_task_list, mutex_uninit_task_list, mutex_task_id;
@@ -102,12 +102,12 @@ void task_deploy()
         while(master.work_client_num < 2 && master.free_client_num > 0){
             mutex_slave_list.lock();
             list_head *temp = free_client_list.next;
-            ClientNode *slave = (ClientNode *)(list_entry(temp, ClientNode, self));
+            PeerNode *slave = (PeerNode *)(list_entry(temp, PeerNode, self));
             list_del(free_client_list.next);
             free_client_list_map.erase(slave->client_id);
             master.free_client_num--;
             list_add_tail(temp, &(master.work_client_head));
-            work_client_list_map.insert(std::map<int, ClientNode*>::value_type(slave->client_id, slave));
+            work_client_list_map.insert(std::map<int, PeerNode*>::value_type(slave->client_id, slave));
             master.work_client_num++;
             mutex_slave_list.unlock();
         }
@@ -130,9 +130,9 @@ void task_deploy()
         int i = 0;
         Task *task = (Task *)(list_entry(&task_node, Task, self));
         list_head subt_head = task->subtask_head, *subt_temp = task->subtask_head.next;
-        ClientNode *slave[2];
-        slave[0] = (ClientNode *)(list_entry(master.work_client_head.next, ClientNode, self));
-        slave[1] = (ClientNode *)(list_entry(master.work_client_head.next->next, ClientNode, self));
+        PeerNode *slave[2];
+        slave[0] = (PeerNode *)(list_entry(master.work_client_head.next, PeerNode, self));
+        slave[1] = (PeerNode *)(list_entry(master.work_client_head.next->next, PeerNode, self));
         int pick = 0;   //指定当前子任务分配给slave[0]还是slave[1]
         std::vector<int> task_workclient_a;      //记录每个子任务按顺序被分配的执行从节点
         while(i < task->subtask_num)

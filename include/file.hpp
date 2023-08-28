@@ -11,7 +11,7 @@
 #include <map>
 #include "md5.hpp"
 #include "base64.hpp"
-#include "master.hpp"
+#include "slave.hpp"
 
 #define FILEBUF_MAX_LENGTH 3072     //3KB
 #define FILE_PACKAGE_SIZE 4096      //4KB
@@ -37,16 +37,25 @@ struct FileTransInfo
     int packsize;               //每个包所含数据的大小
 };
 
+struct FileReqNode
+{
+    std::string fname;          //请求的目标文件名
+    list_head head;             //指向文件请求链表的头结点
+    list_head self;             //指向自身在链表中的指针
+};
+
 void FileInfoInit(FileInfo *info);
 
 bool FileInfoGet(std::string path, FileInfo *info);
 
-string client_task_list_export(int client_id);
-
-string work_client_list_export();
-
 void file_send(int sock, std::string path);
 
-void file_recv(int sock, FileInfo *info);
+void file_recv(int sock, FileInfo *info, std::ofstream ofs, std::string res_md5);
+
+bool isFileExists(string& name);
+
+void work_client_list_descfile_parse_and_update(std::string fname);
+
+void client_task_list_descfile_parse_and_update(std::string fname);
 
 #endif //__FILE_HPP
