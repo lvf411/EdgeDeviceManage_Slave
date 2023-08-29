@@ -77,6 +77,7 @@ int startup(){
     slave.task = task_list;
     slave.current_task = NULL;
     slave.next_task = NULL;
+    slave.current_file_trans_info = new FileTransInfo();
 
     //初始化peer_list
     peer_list = LIST_HEAD_INIT(peer_list);
@@ -136,7 +137,7 @@ void slave_accept(int sock)
         
         peerNode->msg_send_threadID_S = thread(peerS_msg_send, peerNode);
         peerNode->msg_recv_threadID_S = thread(peerS_msg_recv, peerNode);
-        peerNode->status = 0;
+        peerNode->status = PEER_STATUS_S_ORIGINAL;
         peerNode->file_trans_sock = -1;
     }
     return;

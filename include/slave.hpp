@@ -58,8 +58,14 @@ struct PeerNode{
     std::thread msg_recv_threadID_C;    //作为客户端，消息接收线程ID
     struct list_head self;              //指向自身在客户端链表中的指针
     int status;                         //分配的发送/接收线程状态，用以指示状态机运行以及部分同步问题
-    int file_trans_sock;                //文件传输时与从节点建立的新连接
+    int file_trans_sock;                //文件传输时与从节点建立的新连接，文件发送端为文件传输sock，文件接收端为监听sock
+    FileTransInfo *current_file_trans_info;      //正在传输的文件的信息
 };
+
+//服务端（接收端）起始状态
+#define PEER_STATUS_S_ORIGINAL              SLAVE_STATUS_ORIGINAL
+//服务端（接收端）收到来自发送端的文件传输请求
+#define PEER_STATUS_S_FILERECV_REQ_RECV     1
 
 struct Slave{
     int sock;                           //与服务端通信的文件描述符
@@ -75,7 +81,7 @@ struct Slave{
     int status;                         //从节点此时所处的状态
     int file_trans_listen_sock;         //从节点监听的数据接收文件描述符
     int file_trans_port;                //数据接收文件描述符绑定的监听端口
-    int file_trans_connect_sock;        //数据接收的数据传输文件描述符
+    FileTransInfo *current_file_trans_info;      //正在传输的文件的信息
     std::thread file_trans_threadID;    //数据接收的线程ID
 };   
 
