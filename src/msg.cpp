@@ -78,7 +78,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             }
             std::ofstream ofs(current_file_trans_info->info.fname, std::ios::binary | std::ios::app);
             std::string res_md5;
-            std::thread file_recv_threadID(file_recv, connect_sock, current_file_trans_info->info, ofs, std::ref(res_md5));
+            std::thread file_recv_threadID(file_recv, connect_sock, &(current_file_trans_info->info), std::ref(ofs), std::ref(res_md5));
             //发送开始传输请求
             Json::Value root;
             root["type"] = Json::Value(MSG_TYPE_FILESEND_START);
@@ -91,7 +91,10 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             root.clear();
 
             //等待文件传输结束
-            file_recv_threadID.join();
+            if(file_recv_threadID.joinable())
+            {
+                file_recv_threadID.join();
+            }
             while(res_md5.compare(current_file_trans_info->info.md5) != 0)
             {
                 //md5检测，文件内容有误
@@ -100,7 +103,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
                 ofstrunc.close();
                 std::ofstream ofsrewrite(current_file_trans_info->info.fname, std::ios::binary | std::ios::app);
                 res_md5.clear();
-                std::thread file_recv_threadID(file_recv, connect_sock, current_file_trans_info->info, ofsrewrite, std::ref(res_md5));
+                std::thread file_recv_threadID(file_recv, connect_sock, &(current_file_trans_info->info), std::ref(ofsrewrite), std::ref(res_md5));
                 //发送重传请求
                 root["type"] = Json::Value(MSG_TYPE_FILESEND_RES);
                 root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
@@ -310,7 +313,72 @@ void peerS_msg_send(PeerNode *peer)
             }
             case PEER_STATUS_S_FILERECV_REQ_RECV:
             {
-                //=====================================
+                //获取待接收文件的信息后获取空闲端口，建立监听
+                peer->file_trans_port = getRandAvaliPort();
+                bool file_trans_allow_flag = true;        //发送同意请求标志
+                if(peer->file_trans_port < 0)
+                {
+                    //获取随机端口失败，不接收文件
+                    file_trans_allow_flag = false;
+                }
+                else
+                {
+                    //获取随机端口成功，先建立listen，此处为接收端， file_trans_sock 为监听sock
+                    peer->file_trans_sock = socket(AF_INET,SOCK_STREAM,0);
+                    if(peer->file_trans_sock < 0){
+                        perror("socket");
+                        exit(1);
+                    }
+
+                    struct sockaddr_in local;
+                    local.sin_family = AF_INET;
+                    local.sin_port = htons(peer->file_trans_port);
+                    local.sin_addr.s_addr = slave.addr.sin_addr.s_addr;
+                    //closesocket 后不经历 TIME_WAIT 的过程，继续重用该socket
+                    bool bReuseaddr=true;
+                    setsockopt(peer->file_trans_sock,SOL_SOCKET,SO_REUSEADDR,(const char*)&bReuseaddr,sizeof(bReuseaddr));
+                    
+                    if(bind(peer->file_trans_sock,(struct sockaddr*)&local,sizeof(local)) < 0)
+                    {
+                        perror("bind");
+                        exit(2);
+                    }
+                    if(listen(peer->file_trans_sock, 1000) < 0)
+                    {
+                        perror("listen");
+                        exit(3);
+                    }
+                    //创建线程接收来自主节点的连接
+                    peer->file_trans_threadID = std::thread(file_trans_socket_accept, peer->sock, peer->file_trans_sock, peer->current_file_trans_info, std::ref(peer->status));
+                    //可以接收文件
+                    file_trans_allow_flag = true;
+                }
+                Json::Value root;
+                root["type"] = Json::Value(MSG_TYPE_FILESEND_REQ_ACK);
+                root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
+                root["src_port"] = Json::Value(ntohs(slave.listen_port));
+                root["fname"] = Json::Value(peer->current_file_trans_info->info.fname);
+                if(file_trans_allow_flag == false)
+                {
+                    root["ret"] = Json::Value(false);
+                    Json::FastWriter fw;
+                    std::stringstream ss;
+                    ss << fw.write(root);
+                    send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                    peer->status = PEER_STATUS_S_ORIGINAL;
+                }
+                else
+                {
+                    //发送消息通知主节点
+                    root["ret"] = Json::Value(true);
+                    root["listen_port"] = Json::Value(peer->file_trans_port);
+                    Json::FastWriter fw;
+                    std::stringstream ss;
+                    ss << fw.write(root);
+                    send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                    peer->status = PEER_STATUS_S_FILERECV_WAIT_CONN;
+                }
+                break;
             }
             default:
             {
@@ -380,9 +448,79 @@ void peerC_msg_send(PeerNode *peer)
     {
         switch (peer->status)
         {
-            case 0:
+            case PEER_STATUS_C_FILESEND_SEND_REQ:
             {
+                Json::Value root;
+                root["type"] = Json::Value(MSG_TYPE_FILESEND_REQ);
+                root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
+                root["src_port"] = Json::Value(peer->local_port);
+                root["fname"] = Json::Value(peer->current_file_trans_info->info.fname);
+                root["exatsize"] = Json::Value(peer->current_file_trans_info->info.exatsize);
+                root["md5"] = Json::Value(peer->current_file_trans_info->info.md5);
+                //开启base64转码
+                root["base64"] = Json::Value(true);
+                if(peer->current_file_trans_info->info.exatsize > (FILE_PACKAGE_SIZE / 4) * 3)
+                {
+                    //文件大小大于单个包长度，需进行拆包发送
+                    root["split"] = Json::Value(true);
+                    root["pack_num"] = Json::Value(peer->current_file_trans_info->info.exatsize / ((FILE_PACKAGE_SIZE * 3) / 4));
+                    root["pack_size"] = Json::Value(FILE_PACKAGE_SIZE);
+                }
+                else
+                {
+                    //文件大小小于单个包长度，不需要拆包发送
+                    root["split"] = Json::Value(false);
+                }
+
+                //生成字符串
+                Json::FastWriter fw;
+                std::stringstream ss;
+                ss << fw.write(root);
+                send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                peer->status = PEER_STATUS_C_FILESEND_WAIT_ACK;
                 break;
+            }
+            case PEER_STATUS_C_FILESEND_CONNECT:
+            {
+                peer->file_trans_sock = socket(AF_INET, SOCK_STREAM, 0);
+                struct sockaddr_in addr;
+                addr.sin_family = AF_INET;
+                addr.sin_addr.s_addr = peer->addr.sin_addr.s_addr;
+                addr.sin_port = htons(peer->file_trans_port);
+                int count = 0;
+                while(count < 10)
+                {
+                    count++;
+                    int ret = connect(peer->file_trans_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr));
+                    if(ret == 0)
+                    {
+                        break;
+                    }
+                }
+                if(count >= 10)
+                {
+                    printf("file send: failed to connect to the target port\n");
+                    Json::Value root;
+                    root["type"] = Json::Value(MSG_TYPE_FILESEND_CANCEL);
+                    root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
+                    root["src_port"] = Json::Value(ntohs(peer->local_port));
+
+                    //生成字符串
+                    Json::FastWriter fw;
+                    std::stringstream ss;
+                    ss << fw.write(root);
+                    send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                    pthread_cancel(peer->msg_recv_threadID_C.native_handle());
+                    return;
+                }
+                break;
+            }
+            case PEER_STATUS_C_FILESEND_SENDFILE:
+            {
+                peer->file_trans_threadID = std::thread(file_send, peer->file_trans_sock, peer->current_file_trans_info->info.fname);
+                peer->file_trans_threadID.join();
+                close(peer->file_trans_sock);
+                return;
             }
             default:
             {
@@ -401,6 +539,37 @@ void peerC_msg_recv(PeerNode *peer)
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
         recv(peer->sock, recvbuf, MSG_BUFFER_SIZE, 0);
+        Json::Value root;
+        Json::Reader rd;
+        rd.parse(recvbuf, root);
 
+        switch (root["type"].asInt())
+        {
+            case MSG_TYPE_FILESEND_REQ_ACK:
+            {
+                bool ret = root["ret"].asBool();
+                if(ret == true)
+                {
+                    peer->file_trans_port = root["listen_port"].asInt();
+                    peer->status = PEER_STATUS_C_FILESEND_CONNECT;
+                }
+                else
+                {
+                    pthread_cancel(peer->msg_send_threadID_C.native_handle());
+                    return;
+                }
+                
+                break;
+            }
+            case MSG_TYPE_FILESEND_START:
+            {
+                peer->status = PEER_STATUS_C_FILESEND_SENDFILE;
+                return;
+            }
+            default:
+            {
+                break;
+            }
+        }
     }
 }

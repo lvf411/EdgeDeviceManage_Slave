@@ -68,7 +68,11 @@ int startup(){
     slave.listen_sock = listen_sock;
     slave.addr.sin_family = selfaddr.sin_family;
     slave.addr.sin_addr.s_addr = inet_addr(root["ip"].asCString());
-    slave.addr.sin_port = htons(root["port"].asInt());
+    struct sockaddr_in local_addr;
+    socklen_t addrlen = sizeof(local_addr);
+    getsockname(slave.sock, (struct sockaddr *)&local_addr, &addrlen);
+    slave.addr.sin_port = local_addr.sin_port;
+    slave.listen_port = htons(root["listen_port"].asInt());
     slave.master_addr.sin_family = destaddr.sin_family;
     slave.master_addr.sin_addr.s_addr = inet_addr(root["master_ip"].asCString());
     slave.master_addr.sin_port = htons(root["master_port"].asInt());
@@ -211,13 +215,13 @@ void subtask_run()
         {
             tres = node->succ_head->next;
             int count = 0;
+            int connsock = socket(AF_INET, SOCK_STREAM, 0);
+            struct sockaddr_in addr;
+            addr.sin_family = AF_INET;
+            addr.sin_port = slave.work_slave_addr.find(tres->client_id)->second->sin_port;
+            addr.sin_addr.s_addr = slave.work_slave_addr.find(tres->client_id)->second->sin_addr.s_addr;
             while(count < MAX_CONN_COUNT)
             {
-                int connsock = socket(AF_INET, SOCK_STREAM, 0);
-                struct sockaddr_in addr;
-                addr.sin_family = AF_INET;
-                addr.sin_port = slave.work_slave_addr.find(tres->client_id)->second->sin_port;
-                addr.sin_addr.s_addr = slave.work_slave_addr.find(tres->client_id)->second->sin_addr.s_addr;
                 int ret = connect(connsock, (struct sockaddr*)&addr, sizeof(addr));
                 if(ret == 0)
                 {
@@ -230,7 +234,46 @@ void subtask_run()
                 continue;
             }
 
-            //建立客户端发送/接收线程发送结果文件===================
+            //建立客户端发送/接收线程发送结果文件
+            struct sockaddr_in localaddr;
+            socklen_t addrlen = sizeof(localaddr);
+            getsockname(connsock, (struct sockaddr *)&localaddr, &addrlen);
+            PeerNode *peer = new PeerNode();
+            peer->client_id = tres->client_id;
+            peer->sock = connsock;
+            peer->addr.sin_family = addr.sin_family;
+            peer->addr.sin_addr.s_addr = addr.sin_addr.s_addr;
+            peer->addr.sin_port = addr.sin_port;
+            peer->local_port = ntohs(localaddr.sin_port);
+            peer->self = LIST_HEAD_INIT(peer->self);
+            peer->head = peer_list;
+            list_add_tail(&peer->self, &peer->head);
+            peer->status = PEER_STATUS_C_FILESEND_SEND_REQ;
+            peer->current_file_trans_info = new FileTransInfo();
+            peer->current_file_trans_info->base64flag = true;
+            FileInfoInit(&peer->current_file_trans_info->info);
+            FileInfoGet(tres->fname, &peer->current_file_trans_info->info);
+            if(peer->current_file_trans_info->info.exatsize > 10240)
+            {
+                peer->current_file_trans_info->splitflag = true;
+                peer->current_file_trans_info->packsize = FILE_PACKAGE_SIZE;
+                peer->current_file_trans_info->packnum = peer->current_file_trans_info->info.exatsize / ((FILE_PACKAGE_SIZE * 3) / 4);
+            }
+            else
+            {
+                peer->current_file_trans_info->splitflag = false;
+            }
+            peer->msg_send_threadID_C = std::thread(peerC_msg_send, peer);
+            peer->msg_recv_threadID_C = std::thread(peerC_msg_recv, peer);
+            if(peer->msg_recv_threadID_C.joinable())
+            {
+                peer->msg_recv_threadID_C.join();
+            }
+            if(peer->msg_send_threadID_C.joinable())
+            {
+                peer->msg_send_threadID_C.join();
+            }
+            //释放peer资源===============
         }
 
         //向主节点通报子任务执行情况
@@ -238,13 +281,14 @@ void subtask_run()
         root["type"] = Json::Value(MSG_TYPE_SUBTASK_RESULT);
         root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
         root["src_port"] = Json::Value(ntohs(slave.addr.sin_port));
+        root["root_id"] = Json::Value(node->root_id);
+        root["subtask_id"] = Json::Value(node->subtask_id);
         root["ret"] = Json::Value(true);
 
         Json::FastWriter fw;
         std::stringstream ss;
         ss << fw.write(root);
         send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
-        
     }
 }
 

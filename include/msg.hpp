@@ -3,7 +3,6 @@
 
 #include "slave.hpp"
 #include "msg_type.hpp"
-#include "file.hpp"
 #include <thread>
 #include <mutex>
 #include <sstream>

@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include "list.hpp"
+#include "file.hpp"
 #include <thread>
 
 #define SLAVE_STATUS_ORIGINAL               0
@@ -29,6 +30,7 @@
 struct SubTaskResult{
     int client_id;                      //对应前驱和后继被分配的从节点ID
     int subtask_id;                     //子任务的ID
+    std::string fname;                  //传递的结果的文件名
     struct SubTaskResult *next;
 };
 
@@ -49,28 +51,46 @@ struct SubTaskNode{
 
 //客户端链表节点
 struct PeerNode{
-    int client_id;                      //设备编号
-    int sock;                           //与客户端通信的文件描述符
-    struct sockaddr_in addr;            //客户端的地址信息
+    int client_id;                      //对方的设备编号
+    int sock;                           //与对方客户端通信的文件描述符
+    struct sockaddr_in addr;            //对方客户端的地址信息
+    int local_port;                     //该连接中与对方连接的本地端口
     std::thread msg_send_threadID_S;    //作为服务端，消息发送线程ID，服务端接收来自客户端的前驱文件
     std::thread msg_recv_threadID_S;    //作为服务端，消息接收线程ID
     std::thread msg_send_threadID_C;    //作为客户端，消息发送线程ID
     std::thread msg_recv_threadID_C;    //作为客户端，消息接收线程ID
-    struct list_head self;              //指向自身在客户端链表中的指针
+    struct list_head self;              //指向自身在从节点客户端链表中的指针
+    struct list_head head;              //指向从节点客户端链表表头
     int status;                         //分配的发送/接收线程状态，用以指示状态机运行以及部分同步问题
     int file_trans_sock;                //文件传输时与从节点建立的新连接，文件发送端为文件传输sock，文件接收端为监听sock
+    int file_trans_port;                //文件接收方提供的通讯端口
     FileTransInfo *current_file_trans_info;      //正在传输的文件的信息
+    std::thread file_trans_threadID;    //数据传输线程的ID
 };
 
 //服务端（接收端）起始状态
 #define PEER_STATUS_S_ORIGINAL              SLAVE_STATUS_ORIGINAL
 //服务端（接收端）收到来自发送端的文件传输请求
-#define PEER_STATUS_S_FILERECV_REQ_RECV     1
+#define PEER_STATUS_S_FILERECV_REQ_RECV     SLAVE_STATUS_FILERECV_REQ_RECV
+//服务端（接收端）等待来自发送端的对文件接收端口的连接
+#define PEER_STATUS_S_FILERECV_WAIT_CONN    SLAVE_STATUS_FILERECV_WAIT_CONN
+
+//客户端（发送端）发送文件传输请求
+#define PEER_STATUS_C_FILESEND_SEND_REQ      100
+//客户端（发送端）等待服务端对文件传输请求的应答
+#define PEER_STATUS_C_FILESEND_WAIT_ACK      101
+//客户端（发送端）收到了服务端发来的应答，建立文件传输连接
+#define PEER_STATUS_C_FILESEND_CONNECT      102
+//客户端（发送端）与服务端建立文件传输连接后等待服务端发来开始信号
+#define PEER_STATUS_C_FILESEND_WAIT_START   103
+//客户端（发送端）向服务端正式发送文件
+#define PEER_STATUS_C_FILESEND_SENDFILE     104
 
 struct Slave{
     int sock;                           //与服务端通信的文件描述符
     int listen_sock;                    //供其他节点主动发起消息通讯连接的文件描述符
-    struct sockaddr_in addr;            //自身的地址信息
+    int listen_port;                    //监听主动连接的端口
+    struct sockaddr_in addr;            //自身连接主节点的地址信息
     struct sockaddr_in master_addr;     //服务端地址信息
     int slave_id;                       //服务端分配的客户端编号
     int task_num;                       //待执行的子任务数量

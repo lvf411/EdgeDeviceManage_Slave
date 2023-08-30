@@ -1,4 +1,5 @@
 #include "file.hpp"
+#include "slave.hpp"
 
 extern Slave slave;
 extern std::map<int, PeerNode *> free_client_list_map, work_client_list_map;
@@ -140,7 +141,7 @@ void work_client_list_descfile_parse_and_update(std::string fname)
 //         ss << node->root_id << '_' << node->subtask_id;
 //         string fname = ss.str();
 //         json_temp["exe_name"] = Json::Value(fname);
-//         json_temp["input_src_num"] = Json::Value(node->prev_num);
+//         json_temp["input_num"] = Json::Value(node->prev_num);
 //         Json::Value prev, next;
 //         SubTaskResult *res_temp = node->prev_head->next;
 //         int j = 0;
@@ -149,10 +150,11 @@ void work_client_list_descfile_parse_and_update(std::string fname)
 //             Json::Value temp;
 //             temp["subtask_id"] = Json::Value(res_temp->subtask_id);
 //             temp["client_id"] = Json::Value(res_temp->client_id);
+//             temp["fname"] = Json::Value(res_temp->fname);
 //             prev.append(temp);
 //         }
-//         json_temp["input_src"] = prev;
-//         json_temp["output_dst_num"] = node->next_num;
+//         json_temp["input"] = prev;
+//         json_temp["output_num"] = node->next_num;
 //         res_temp = node->succ_head->next;
 //         j = 0;
 //         while(res_temp != NULL && j < node->next_num)
@@ -160,9 +162,10 @@ void work_client_list_descfile_parse_and_update(std::string fname)
 //             Json::Value temp;
 //             temp["subtask_id"] = Json::Value(res_temp->subtask_id);
 //             temp["client_id"] = Json::Value(res_temp->client_id);
+//             temp["fname"] = Json::Value(res_temp->fname);
 //             next.append(temp);
 //         }
-//         json_temp["output_dst"] = next;
+//         json_temp["output"] = next;
 //         json_subtask.append(json_temp);
 //     }
 //     root["subtask"] = json_subtask;
@@ -234,28 +237,30 @@ void client_task_list_descfile_parse_and_update(std::string fname)
             node->subtask_id = subtaskid;
             node->exepath = subtask[i]["exe_name"].asString();
             node->exe_flag = false;     //还未从主节点接收文件
-            node->prev_num = subtask[i]["input_src_num"].asInt();
+            node->prev_num = subtask[i]["input_num"].asInt();
             node->prev_head = new SubTaskResult();
             node->prev_head->next = NULL;
             SubTaskResult *temp = node->prev_head;
             for(int j = 0; j < node->prev_num; j++)
             {
                 SubTaskResult *nnode = new SubTaskResult();
-                nnode->subtask_id = subtask[i]["input_src"][j]["subtask_id"].asInt();
-                nnode->client_id = subtask[i]["input_src"][j]["client_id"].asInt();
+                nnode->subtask_id = subtask[i]["input"][j]["subtask_id"].asInt();
+                nnode->client_id = subtask[i]["input"][j]["client_id"].asInt();
+                nnode->fname = subtask[i]["input"][j]["fname"].asString();
                 nnode->next = temp->next;
                 temp->next = nnode;
                 temp = nnode;
             }
-            node->next_num = subtask[i]["output_dst_num"].asInt();
+            node->next_num = subtask[i]["output_num"].asInt();
             node->succ_head = new SubTaskResult();
             node->succ_head->next = NULL;
-            SubTaskResult *temp = node->succ_head;
+            temp = node->succ_head;
             for(int j = 0; j < node->next_num; j++)
             {
                 SubTaskResult *nnode = new SubTaskResult();
-                nnode->subtask_id = subtask[i]["output_dst"][j]["subtask_id"].asInt();
-                nnode->client_id = subtask[i]["output_dst"][j]["client_id"].asInt();
+                nnode->subtask_id = subtask[i]["output"][j]["subtask_id"].asInt();
+                nnode->client_id = subtask[i]["output"][j]["client_id"].asInt();
+                nnode->fname = subtask[i]["output"][j]["fname"].asString();
                 nnode->next = temp->next;
                 temp->next = nnode;
                 temp = nnode;
@@ -312,7 +317,7 @@ void file_send(int sock, std::string path)
 }
 
 //接收了对方的文件传输套接字的连接，还没发送确认信息,res_md5传引用
-void file_recv(int sock, FileInfo *info, std::ofstream ofs, std::string res_md5)
+void file_recv(int sock, FileInfo *info, std::ofstream& ofs, std::string& res_md5)
 {
     // std::ofstream ofs(info->fname, std::ios::binary | std::ios::app);
     char recvbuf[FILE_PACKAGE_SIZE];

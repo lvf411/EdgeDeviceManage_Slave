@@ -11,7 +11,7 @@
 #include <map>
 #include "md5.hpp"
 #include "base64.hpp"
-#include "slave.hpp"
+#include "list.hpp"
 
 #define FILEBUF_MAX_LENGTH 3072     //3KB
 #define FILE_PACKAGE_SIZE 4096      //4KB
@@ -50,7 +50,7 @@ bool FileInfoGet(std::string path, FileInfo *info);
 
 void file_send(int sock, std::string path);
 
-void file_recv(int sock, FileInfo *info, std::ofstream ofs, std::string res_md5);
+void file_recv(int sock, FileInfo *info, std::ofstream& ofs, std::string& res_md5);
 
 bool isFileExists(string& name);
 
