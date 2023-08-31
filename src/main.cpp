@@ -84,7 +84,7 @@ int startup(){
     slave.master_addr.sin_port = htons(root["master_port"].asInt());
     slave.slave_id = 0;
     slave.task_num = 0;
-    slave.task = task_list;
+    slave.task = &task_list;
     slave.current_task = NULL;
     slave.next_task = NULL;
     slave.current_file_trans_info = new FileTransInfo();
@@ -185,7 +185,7 @@ void file_req()
 //运行子任务=============================
 void subtask_run()
 {
-    list_head *temp = &slave.task;
+    list_head *temp = slave.task;
     while(1)
     {
         if(slave.task_num == 0)
@@ -194,7 +194,7 @@ void subtask_run()
             continue;
         }
 
-        if(temp == &slave.task)
+        if(temp == slave.task)
         {
             temp = temp->next;
         }
@@ -202,7 +202,7 @@ void subtask_run()
         int count = 0;      //计数，防止所有待执行子任务都需等待其他子任务结果时陷入死循环
         while((node->prev_num > 0 || node->exe_flag == false) && count < slave.task_num){
             temp = temp->next;
-            if(temp == &slave.task)
+            if(temp == slave.task)
             {
                 temp = temp->next;
             }
@@ -258,8 +258,8 @@ void subtask_run()
             peer->addr.sin_port = addr.sin_port;
             peer->local_port = ntohs(localaddr.sin_port);
             peer->self = LIST_HEAD_INIT(peer->self);
-            peer->head = peer_list;
-            list_add_tail(&peer->self, &peer->head);
+            peer->head = &peer_list;
+            list_add_tail(&peer->self, peer->head);
             peer->status = PEER_STATUS_C_FILESEND_SEND_REQ;
             peer->current_file_trans_info = new FileTransInfo();
             peer->current_file_trans_info->base64flag = true;
