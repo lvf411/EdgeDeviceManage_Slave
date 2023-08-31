@@ -6,6 +6,7 @@
 #include "msg.hpp"
 
 #define INITFILE "slave_init.json"
+#define MAX_LISTENING 1000
 #define MAX_CONN_COUNT  10
 
 using namespace std;
@@ -52,6 +53,11 @@ int startup(){
         perror("socket bind error");
         exit(0);
     }
+    if(listen(listen_sock, MAX_LISTENING) < 0)
+	{
+		perror("listen");
+		exit(3);
+	}
 
     //向主节点监听地址发起连接
     destaddr.sin_addr.s_addr = inet_addr(root["master_ip"].asCString());
@@ -132,10 +138,8 @@ void slave_accept(int sock)
             continue;
         }
         
-        list_head *self = new list_head();
-        *self = LIST_HEAD_INIT(*self);
-        peerNode->self = *self;
-        list_add_tail(self, &peer_list);
+        peerNode->self = LIST_HEAD_INIT(peerNode->self);
+        list_add_tail(&peerNode->self, &peer_list);
         peer_list_map.insert(map<int, PeerNode *>::value_type(peerNode->client_id, peerNode));
         mutex_peer_list.unlock();
         
@@ -213,6 +217,7 @@ void subtask_run()
         }
         //找到可执行子任务的节点node
         //执行子任务========================
+        printf("root:%d subtask:%d processing...\n", node->root_id, node->subtask_id);
 
         //发送任务执行结果给后继
         SubTaskResult *tres;
