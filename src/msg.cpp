@@ -61,8 +61,8 @@ bool key_file_check(std::string fname)
 //收到主节点传来的子任务执行文件后将子任务描述节点中的exe存在标志置位
 void exeflag_update(int root_id, int subtask_id)
 {
-    list_head *temp = slave.task.next;
-    while(temp != &slave.task)
+    list_head *temp = slave.task->next;
+    while(temp != slave.task)
     {
         SubTaskNode *node = list_entry(temp, SubTaskNode, self);
         if(node->root_id == root_id)
@@ -78,8 +78,8 @@ void exeflag_update(int root_id, int subtask_id)
 
 void subtask_input_update(int root_id, int subtask_id, std::string fname)
 {
-    list_head *temp = slave.task.next;
-    while(temp != &slave.task)
+    list_head *temp = slave.task->next;
+    while(temp != slave.task)
     {
         SubTaskNode *node = list_entry(temp, SubTaskNode, self);
         if(node->root_id == root_id)

@@ -43,7 +43,7 @@ struct SubTaskNode{
     struct SubTaskResult *prev_head;    //运行当前子任务需要传来参数的前驱的输出结果链表头节点
     int next_num;                       //标记当前子任务需要向后传递的后继数量
     struct SubTaskResult *succ_head;    //当前子任务需要向后传递的后继信息链表头结点
-    struct list_head head;              //任务链表表头
+    struct list_head *head;             //任务链表表头
     struct list_head self;              //指向自身在链表中的指针
     std::string exepath;                //子任务执行文件路径
     bool exe_flag;                      //指示子任务执行文件是否已从主节点接收
@@ -60,7 +60,7 @@ struct PeerNode{
     std::thread msg_send_threadID_C;    //作为客户端，消息发送线程ID
     std::thread msg_recv_threadID_C;    //作为客户端，消息接收线程ID
     struct list_head self;              //指向自身在从节点客户端链表中的指针
-    struct list_head head;              //指向从节点客户端链表表头
+    struct list_head *head;             //指向从节点客户端链表表头
     int status;                         //分配的发送/接收线程状态，用以指示状态机运行以及部分同步问题
     int file_trans_sock;                //文件传输时与从节点建立的新连接，文件发送端为文件传输sock，文件接收端为监听sock
     int file_trans_port;                //文件接收方提供的通讯端口
@@ -94,7 +94,7 @@ struct Slave{
     struct sockaddr_in master_addr;     //服务端地址信息
     int slave_id;                       //服务端分配的客户端编号
     int task_num;                       //待执行的子任务数量
-    struct list_head task;              //子任务链表表头
+    struct list_head *task;             //子任务链表表头
     struct Task *current_task;          //当前正在执行的子任务
     struct Task *next_task;             //下一个执行的子任务
     std::map<int, struct sockaddr_in*> work_slave_addr;          //按照客户端编号存储的正在运行的所有客户端节点地址信息

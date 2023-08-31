@@ -189,8 +189,8 @@ void work_client_list_descfile_parse_and_update(std::string fname)
 
 bool find_subtask(int rootid, int subtaskid)
 {
-    list_head head = slave.task, *temp = slave.task.next;
-    while(temp != &head)
+    list_head *head = slave.task, *temp = slave.task->next;
+    while(temp != head)
     {
         SubTaskNode *node = list_entry(temp, SubTaskNode, self);
         if(node->root_id == rootid)
@@ -267,7 +267,7 @@ void client_task_list_descfile_parse_and_update(std::string fname)
             }
             node->head = slave.task;
             node->self = LIST_HEAD_INIT(node->self);
-            list_add_tail(&node->self, &node->head);
+            list_add_tail(&node->self, node->head);
 
             //插入到文件请求链表中
             FileReqNode *req_node = new FileReqNode();
