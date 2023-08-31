@@ -272,6 +272,8 @@ void client_task_list_descfile_parse_and_update(std::string fname)
             //插入到文件请求链表中
             FileReqNode *req_node = new FileReqNode();
             req_node->fname = node->exepath;
+            req_node->rootid = node->root_id;
+            req_node->subtaskid = node->subtask_id;
             req_node->self = LIST_HEAD_INIT(req_node->self);
             req_node->head = file_req_list;
             list_add_tail(&req_node->self, &req_node->head);

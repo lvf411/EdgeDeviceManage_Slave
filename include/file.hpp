@@ -35,11 +35,22 @@ struct FileTransInfo
     bool base64flag;            //包内数据是否进行base64转码
     int packnum;                //拆包后的分包总数量
     int packsize;               //每个包所含数据的大小
+    int file_type;              //文件类型
+    int dst_rootid;             //指示发送给哪个任务的文件
+    int dst_subtaskid;          //指示发送给 dst_rootid 的哪一个子任务的文件
 };
+
+#define FILE_TYPE_ORDINARY      0
+#define FILE_TYPE_EXE           1
+#define FILE_TYPE_INPUT         2
+#define FILE_TYPE_OUTPUT        3
+#define FILE_TYPE_KEY           4
 
 struct FileReqNode
 {
     std::string fname;          //请求的目标文件名
+    int rootid;                 //指示该执行文件属于哪个任务
+    int subtaskid;              //指示该执行文件属于 rootid 下的哪个子任务
     list_head head;             //指向文件请求链表的头结点
     list_head self;             //指向自身在链表中的指针
 };

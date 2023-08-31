@@ -58,6 +58,57 @@ bool key_file_check(std::string fname)
     return true;
 }
 
+//收到主节点传来的子任务执行文件后将子任务描述节点中的exe存在标志置位
+void exeflag_update(int root_id, int subtask_id)
+{
+    list_head *temp = slave.task.next;
+    while(temp != &slave.task)
+    {
+        SubTaskNode *node = list_entry(temp, SubTaskNode, self);
+        if(node->root_id == root_id)
+        {
+            if(node->subtask_id == subtask_id)
+            {
+                node->exe_flag =true;
+            }
+        }
+        temp = temp->next;
+    }
+}
+
+void subtask_input_update(int root_id, int subtask_id, std::string fname)
+{
+    list_head *temp = slave.task.next;
+    while(temp != &slave.task)
+    {
+        SubTaskNode *node = list_entry(temp, SubTaskNode, self);
+        if(node->root_id == root_id)
+        {
+            if(node->subtask_id == subtask_id)
+            {
+                SubTaskResult *tret = node->prev_head;
+                while(tret->next != NULL)
+                {
+                    if(tret->next->fname.compare(fname) == 0)
+                    {
+                        SubTaskResult *t = tret->next;
+                        tret->next = t->next;
+                        delete t;
+                        node->prev_num--;
+                        if(node->prev_num == 0)
+                        {
+                            delete node->prev_head;
+                        }
+                        break;
+                    }
+                    tret = tret->next;
+                }
+            }
+        }
+        temp = temp->next;
+    }
+}
+
 //接收文件传输socket连接线程
 void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransInfo *current_file_trans_info, int status)
 {
@@ -130,12 +181,32 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             close(listen_sock);
             status = SLAVE_STATUS_ORIGINAL;
 
-            //检查文件是否为关键文件，若是则解包并更新系统信息
-            if(!key_file_check(current_file_trans_info->info.fname))
+            //检查文件类型，响应做出更新
+            switch(current_file_trans_info->file_type)
             {
-                //不是关键文件，检查是否为其他节点传来的前驱结果文件
-
-                //其他，普通文件
+                case FILE_TYPE_KEY:
+                {
+                    //为关键文件，若是则解包并更新系统信息
+                    key_file_check(current_file_trans_info->info.fname);
+                    break;
+                }
+                case FILE_TYPE_EXE:
+                {
+                    //主节点传来的执行文件，记录对应子任务的 exe_flag
+                    exeflag_update(current_file_trans_info->dst_rootid, current_file_trans_info->dst_subtaskid);
+                    break;
+                }
+                case FILE_TYPE_INPUT:
+                {
+                    //其他从节点传来的子任务执行输入文件，更新对应子任务执行需要等待的输入信息
+                    subtask_input_update(current_file_trans_info->dst_rootid, current_file_trans_info->dst_subtaskid, current_file_trans_info->info.fname);
+                    break;
+                }
+                default:
+                {
+                    //其他
+                    break;
+                }
             }
             break;
         }
@@ -287,6 +358,8 @@ void msg_recv()
                     //主节点正忙，等待后重新请求，将文件请求重新加入请求链表中
                     FileReqNode *req_node = new FileReqNode();
                     req_node->fname = root["fname"].asString();
+                    req_node->rootid = root["rootid"].asInt();
+                    req_node->subtaskid = root["subtaskid"].asInt();
                     req_node->self = LIST_HEAD_INIT(req_node->self);
                     req_node->head = file_req_list;
                     list_add_tail(&req_node->self, &req_node->head);
@@ -348,7 +421,7 @@ void peerS_msg_send(PeerNode *peer)
                         perror("listen");
                         exit(3);
                     }
-                    //创建线程接收来自主节点的连接
+                    //创建线程接收来自对方的连接
                     peer->file_trans_threadID = std::thread(file_trans_socket_accept, peer->sock, peer->file_trans_sock, peer->current_file_trans_info, std::ref(peer->status));
                     //可以接收文件
                     file_trans_allow_flag = true;
@@ -369,7 +442,7 @@ void peerS_msg_send(PeerNode *peer)
                 }
                 else
                 {
-                    //发送消息通知主节点
+                    //发送消息通知对方
                     root["ret"] = Json::Value(true);
                     root["listen_port"] = Json::Value(peer->file_trans_port);
                     Json::FastWriter fw;
@@ -424,6 +497,9 @@ void peerS_msg_recv(PeerNode *peer)
                     peer->current_file_trans_info->info.unit = SizeUnit[unit];
                     peer->current_file_trans_info->info.md5 = root["md5"].asString();
                     peer->current_file_trans_info->base64flag = root["base64"].asBool();
+                    peer->current_file_trans_info->dst_rootid = root["dst_rootid"].asInt();
+                    peer->current_file_trans_info->dst_subtaskid = root["dst_subtaskid"].asInt();
+                    peer->current_file_trans_info->file_type = root["file_type"].asInt();
                     peer->current_file_trans_info->splitflag = root["split"].asBool();
                     if(peer->current_file_trans_info->splitflag == true)
                     {
@@ -459,6 +535,9 @@ void peerC_msg_send(PeerNode *peer)
                 root["md5"] = Json::Value(peer->current_file_trans_info->info.md5);
                 //开启base64转码
                 root["base64"] = Json::Value(true);
+                root["dst_rootid"] = Json::Value(peer->current_file_trans_info->dst_rootid);
+                root["dst_subtaskid"] = Json::Value(peer->current_file_trans_info->dst_subtaskid);
+                root["file_type"] = Json::Value(peer->current_file_trans_info->file_type);
                 if(peer->current_file_trans_info->info.exatsize > (FILE_PACKAGE_SIZE / 4) * 3)
                 {
                     //文件大小大于单个包长度，需进行拆包发送

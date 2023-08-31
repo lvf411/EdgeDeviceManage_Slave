@@ -165,6 +165,8 @@ void file_req()
         root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
         root["src_port"] = Json::Value(ntohs(slave.addr.sin_port));
         root["fname"] = Json::Value(node->fname);
+        root["rootid"] = Json::Value(node->rootid);
+        root["subtaskid"] = Json::Value(node->subtaskid);
         Json::FastWriter fw;
         std::stringstream ss;
         ss << fw.write(root);
@@ -196,6 +198,10 @@ void subtask_run()
         int count = 0;      //计数，防止所有待执行子任务都需等待其他子任务结果时陷入死循环
         while((node->prev_num > 0 || node->exe_flag == false) && count < slave.task_num){
             temp = temp->next;
+            if(temp == &slave.task)
+            {
+                temp = temp->next;
+            }
             node = list_entry(temp, SubTaskNode, self);
             count++;
         }
@@ -211,7 +217,8 @@ void subtask_run()
         //发送任务执行结果给后继
         SubTaskResult *tres;
         vector<int> failtrans_succ_client_id;
-        for(int i = 0; i < node->next_num; i++)
+        int sendnum = node->next_num;
+        for(int i = 0; i < sendnum; i++)
         {
             tres = node->succ_head->next;
             int count = 0;
@@ -253,6 +260,9 @@ void subtask_run()
             peer->current_file_trans_info->base64flag = true;
             FileInfoInit(&peer->current_file_trans_info->info);
             FileInfoGet(tres->fname, &peer->current_file_trans_info->info);
+            peer->current_file_trans_info->dst_rootid = node->root_id;
+            peer->current_file_trans_info->dst_subtaskid = tres->subtask_id;
+            peer->current_file_trans_info->file_type = FILE_TYPE_INPUT;
             if(peer->current_file_trans_info->info.exatsize > 10240)
             {
                 peer->current_file_trans_info->splitflag = true;
@@ -273,8 +283,17 @@ void subtask_run()
             {
                 peer->msg_send_threadID_C.join();
             }
-            //释放peer资源===============
+            //释放peer资源
+            list_del(&peer->self);
+            delete peer->current_file_trans_info;
+            delete peer;
+
+            //释放tres
+            node->succ_head->next = tres->next;
+            delete tres;
+            node->next_num--;
         }
+        delete node->succ_head;
 
         //向主节点通报子任务执行情况
         Json::Value root;
