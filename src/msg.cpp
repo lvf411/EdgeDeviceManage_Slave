@@ -324,8 +324,8 @@ void msg_recv()
                     slave.current_file_trans_info->info.fname.clear();
                     slave.current_file_trans_info->info.md5.clear();
                     slave.current_file_trans_info->info.fname = root["fname"].asString();
-                    slave.current_file_trans_info->info.exatsize = root["exatsize"].asInt64();
-                    long long int temp = root["exatsize"].asInt64();
+                    slave.current_file_trans_info->info.exatsize = root["exatsize"].asUInt();
+                    uint temp = root["exatsize"].asUInt();
                     int unit = 0;
                     while(temp > 10000)
                     {
@@ -485,8 +485,8 @@ void peerS_msg_recv(PeerNode *peer)
                     peer->current_file_trans_info->info.fname.clear();
                     peer->current_file_trans_info->info.md5.clear();
                     peer->current_file_trans_info->info.fname = root["fname"].asString();
-                    peer->current_file_trans_info->info.exatsize = root["exatsize"].asInt64();
-                    long long int temp = root["exatsize"].asInt64();
+                    peer->current_file_trans_info->info.exatsize = root["exatsize"].asUInt();
+                    uint temp = root["exatsize"].asUInt();
                     int unit = 0;
                     while(temp > 10000)
                     {

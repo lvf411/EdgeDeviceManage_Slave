@@ -22,7 +22,7 @@
 struct FileInfo
 {
     std::string fname;          //文件名
-    long long int exatsize;     //实际大小，单位字节
+    uint exatsize;     //实际大小，单位字节
     int filesize;               //单位换算后的显示大小
     char unit;                  //单位
     std::string md5;            //计算出的md5值
