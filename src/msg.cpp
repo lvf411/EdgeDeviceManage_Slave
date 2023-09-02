@@ -313,6 +313,7 @@ void msg_recv()
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
         recv(slave.sock, recvbuf, MSG_BUFFER_SIZE, 0);
+        std::cout << recvbuf << std::endl;
         Json::Value root;
         Json::Reader rd;
         rd.parse(recvbuf, root);
@@ -477,6 +478,7 @@ void peerS_msg_recv(PeerNode *peer)
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
         recv(peer->sock, recvbuf, MSG_BUFFER_SIZE, 0);
+        std::cout << recvbuf << std::endl;
         Json::Value root;
         Json::Reader rd;
         rd.parse(recvbuf, root);
@@ -627,6 +629,7 @@ void peerC_msg_recv(PeerNode *peer)
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
         recv(peer->sock, recvbuf, MSG_BUFFER_SIZE, 0);
+        std::cout << recvbuf << std::endl;
         Json::Value root;
         Json::Reader rd;
         rd.parse(recvbuf, root);
