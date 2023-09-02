@@ -100,6 +100,26 @@ file.hpp
 thread
 -
 
+/home/lf/Documents/EdgeDeviceManage_Slave/src/file.cpp
+file.hpp
+/home/lf/Documents/EdgeDeviceManage_Slave/src/file.hpp
+slave.hpp
+/home/lf/Documents/EdgeDeviceManage_Slave/src/slave.hpp
+
+/home/lf/Documents/EdgeDeviceManage_Slave/src/main.cpp
+slave.hpp
+/home/lf/Documents/EdgeDeviceManage_Slave/src/slave.hpp
+jsoncpp/json/json.h
+-
+fstream
+-
+thread
+-
+map
+-
+msg.hpp
+/home/lf/Documents/EdgeDeviceManage_Slave/src/msg.hpp
+
 /home/lf/Documents/EdgeDeviceManage_Slave/src/msg.cpp
 msg.hpp
 /home/lf/Documents/EdgeDeviceManage_Slave/src/msg.hpp

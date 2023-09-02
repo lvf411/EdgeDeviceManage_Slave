@@ -99,6 +99,8 @@ struct Slave{
     struct Task *next_task;             //下一个执行的子任务
     std::map<int, struct sockaddr_in*> work_slave_addr;          //按照客户端编号存储的正在运行的所有客户端节点地址信息
     int status;                         //从节点此时所处的状态
+    std::thread master_msg_send_threadID;       //与主节点通信的消息发送线程ID
+    std::thread master_msg_recv_threadID;       //与主节点通信的消息接收线程ID
     int file_trans_listen_sock;         //从节点监听的数据接收文件描述符
     int file_trans_port;                //数据接收文件描述符绑定的监听端口
     FileTransInfo *current_file_trans_info;      //正在传输的文件的信息

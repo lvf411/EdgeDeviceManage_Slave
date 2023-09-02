@@ -88,6 +88,8 @@ int startup(){
     slave.current_task = NULL;
     slave.next_task = NULL;
     slave.current_file_trans_info = new FileTransInfo();
+    slave.master_msg_send_threadID = thread(msg_send);
+    slave.master_msg_recv_threadID = thread(msg_recv);
 
     //初始化peer_list
     peer_list = LIST_HEAD_INIT(peer_list);
@@ -323,6 +325,14 @@ int main()
     if(slave_listen_threadID.joinable())
     {
         slave_listen_threadID.join();
+    }
+    if(slave.master_msg_send_threadID.joinable())
+    {
+        slave.master_msg_send_threadID.join();
+    }
+    if(slave.master_msg_recv_threadID.joinable())
+    {
+        slave.master_msg_recv_threadID.join();
     }
     
     return 0;
