@@ -139,6 +139,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             std::stringstream ss;
             ss << fw.write(root);
             send(instruction_sock, ss.str().c_str(), ss.str().length(), 0);
+            std::cout << ss.str() << std::endl;
             root.clear();
 
             //等待文件传输结束
@@ -165,6 +166,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
                 ss.str("");
                 ss << fw.write(root);
                 send(instruction_sock, ss.str().c_str(), ss.str().length(), 0);
+                std::cout << ss.str() << std::endl;
                 file_recv_threadID.join();
             }
             //md5检测，文件内容正确
@@ -176,6 +178,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             ss.str("");
             ss << fw.write(root);
             send(instruction_sock, ss.str().c_str(), ss.str().length(), 0);
+            std::cout << ss.str() << std::endl;
             //关闭文件传输连接文件描述符
             close(connect_sock);
             close(listen_sock);
@@ -278,6 +281,7 @@ void msg_send()
                     std::stringstream ss;
                     ss << fw.write(root);
                     send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
+                    std::cout << ss.str() << std::endl;
                     slave.status = SLAVE_STATUS_ORIGINAL;
                 }
                 else
@@ -289,6 +293,7 @@ void msg_send()
                     std::stringstream ss;
                     ss << fw.write(root);
                     send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
+                    std::cout << ss.str() << std::endl;
                     slave.status = SLAVE_STATUS_FILERECV_WAIT_CONN;
                 }
                 break;
@@ -438,6 +443,7 @@ void peerS_msg_send(PeerNode *peer)
                     std::stringstream ss;
                     ss << fw.write(root);
                     send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                    std::cout << ss.str() << std::endl;
                     peer->status = PEER_STATUS_S_ORIGINAL;
                 }
                 else
@@ -449,6 +455,7 @@ void peerS_msg_send(PeerNode *peer)
                     std::stringstream ss;
                     ss << fw.write(root);
                     send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                    std::cout << ss.str() << std::endl;
                     peer->status = PEER_STATUS_S_FILERECV_WAIT_CONN;
                 }
                 break;
@@ -556,6 +563,7 @@ void peerC_msg_send(PeerNode *peer)
                 std::stringstream ss;
                 ss << fw.write(root);
                 send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                std::cout << ss.str() << std::endl;
                 peer->status = PEER_STATUS_C_FILESEND_WAIT_ACK;
                 break;
             }
@@ -589,6 +597,7 @@ void peerC_msg_send(PeerNode *peer)
                     std::stringstream ss;
                     ss << fw.write(root);
                     send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
+                    std::cout << ss.str() << std::endl;
                     pthread_cancel(peer->msg_recv_threadID_C.native_handle());
                     return;
                 }

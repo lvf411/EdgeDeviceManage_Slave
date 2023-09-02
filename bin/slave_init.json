@@ -1,6 +1,6 @@
 {
     "ip":   "169.254.122.12",
     "listen_port": 8888,
-    "master_ip":    "xxx.xxx.xxx.xxx",
-    "master_port":  1234
+    "master_ip":    "169.254.12.12",
+    "master_port":  10000
 }
