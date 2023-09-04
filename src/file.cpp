@@ -334,14 +334,18 @@ void file_recv(int sock, FileInfo *info, std::ofstream& ofs, std::string& res_md
     while(packid < packnum)
     {
         recv_length = recv(sock, recvbuf, FILE_PACKAGE_SIZE, 0);
-        std::cout << "filerecv: " << recvbuf << std::endl;
+        std::cout << "filerecv: " << recvbuf << std::endl << "recvlen: " << recv_length << std::endl;
         Base64_Decode(recvbuf, recv_length, file_writebuf, &file_length);
-        std::cout << "filewrite: " << recvbuf << std::endl;
+        std::cout << "filewrite: " << file_writebuf << std::endl;
         ofs.write(file_writebuf, file_length);
         whole_length += file_length;
         packid++;
         Json::Value root;
         root["ret"] = Json::Value(packid);
+        Json::FastWriter fw;
+        std::stringstream ss;
+        ss << fw.write(root);
+        send(sock, ss.str().c_str(), ss.str().length(), 0);
     }
     ofs.close();
     std::ifstream ifs(info->fname, std::ios::binary);

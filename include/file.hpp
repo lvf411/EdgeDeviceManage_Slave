@@ -13,8 +13,8 @@
 #include "base64.hpp"
 #include "list.hpp"
 
-#define FILEBUF_MAX_LENGTH 3072     //3KB
-#define FILE_PACKAGE_SIZE 4096      //4KB
+#define FILEBUF_MAX_LENGTH 768      //768B
+#define FILE_PACKAGE_SIZE 1024      //1KB
 
 #define FILE_RECV_STATUS_NONE       0
 #define FILE_RECV_STATUS_RECVING    1
