@@ -190,6 +190,7 @@ void subtask_run()
     list_head *temp = slave.task;
     while(1)
     {
+        cout << endl << "task_num:" << slave.task_num << endl;
         if(slave.task_num == 0)
         {
             sleep(1);
@@ -322,9 +323,14 @@ int main()
 {
     int sock = startup();
     thread slave_listen_threadID(slave_accept, sock);
+    thread subtask_run_threadID(subtask_run);
     if(slave_listen_threadID.joinable())
     {
         slave_listen_threadID.join();
+    }
+    if(subtask_run_threadID.joinable())
+    {
+        subtask_run_threadID.join();
     }
     if(slave.master_msg_send_threadID.joinable())
     {

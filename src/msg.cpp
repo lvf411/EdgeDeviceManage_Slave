@@ -309,6 +309,13 @@ void msg_send()
 void msg_recv()
 {
     char recvbuf[MSG_BUFFER_SIZE] = {0};
+    //先获取主节点分配的从节点ID
+    recv(slave.sock, recvbuf, MSG_BUFFER_SIZE, 0);
+    std::cout << "recv: " <<  recvbuf << std::endl;
+    Json::Value root;
+    Json::Reader rd;
+    rd.parse(recvbuf, root);
+    slave.slave_id = root["slaveID"].asInt();
     while(1)
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
@@ -343,6 +350,7 @@ void msg_recv()
                     slave.current_file_trans_info->info.md5 = root["md5"].asString();
                     slave.current_file_trans_info->base64flag = root["base64"].asBool();
                     slave.current_file_trans_info->splitflag = root["split"].asBool();
+                    slave.current_file_trans_info->file_type = root["file_type"].asInt();
                     if(slave.current_file_trans_info->splitflag == true)
                     {
                         slave.current_file_trans_info->packnum = root["pack_num"].asInt();
