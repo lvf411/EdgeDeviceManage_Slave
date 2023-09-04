@@ -291,7 +291,7 @@ void file_send(int sock, std::string path)
     FileInfo info;
     FileInfoInit(&info);
     FileInfoGet(path, &info);
-    int packid = 0, packnum = ((info.exatsize / 3) * 4) / FILE_PACKAGE_SIZE;
+    int packid = 0, packnum = ((info.exatsize / 3) * 4) / FILE_PACKAGE_SIZE + 1;
     ifstream ifs(path, std::ios::binary);
     char file_readbuf[FILEBUF_MAX_LENGTH];
     char sendbuf[FILE_PACKAGE_SIZE];
@@ -304,10 +304,13 @@ void file_send(int sock, std::string path)
         memset(sendbuf, 0, FILE_PACKAGE_SIZE);
         memset(recvbuf, 0, 1024);
         ifs.read(file_readbuf, FILEBUF_MAX_LENGTH);
+        std::cout << "fileread: " << recvbuf << std::endl;
         Base64_Encode(file_readbuf, ifs.gcount(), sendbuf, &sendlength);
         do{
             send(sock, sendbuf, sendlength, 0);
+            std::cout << "filesend: " << recvbuf << std::endl;
             recv(sock, recvbuf, 1024, 0);
+            std::cout << "filerecv: " << recvbuf << std::endl;
             Json::Value root;
             Json::Reader rd;
             rd.parse(recvbuf, root);
@@ -327,11 +330,13 @@ void file_recv(int sock, FileInfo *info, std::ofstream& ofs, std::string& res_md
     char sendbuf[1024];
     long long int  whole_length = 0;
     uint32_t file_length = 0, recv_length = 0;
-    int packid = 0, packnum = ((info->exatsize / 3) * 4) / FILE_PACKAGE_SIZE;
+    int packid = 0, packnum = ((info->exatsize / 3) * 4) / FILE_PACKAGE_SIZE + 1;
     while(packid < packnum)
     {
         recv_length = recv(sock, recvbuf, FILE_PACKAGE_SIZE, 0);
+        std::cout << "filerecv: " << recvbuf << std::endl;
         Base64_Decode(recvbuf, recv_length, file_writebuf, &file_length);
+        std::cout << "filewrite: " << recvbuf << std::endl;
         ofs.write(file_writebuf, file_length);
         whole_length += file_length;
         packid++;

@@ -110,7 +110,7 @@ void subtask_input_update(int root_id, int subtask_id, std::string fname)
 }
 
 //接收文件传输socket连接线程
-void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransInfo *current_file_trans_info, int status)
+void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransInfo *current_file_trans_info, int &status)
 {
     struct sockaddr_in client;
     socklen_t len = sizeof(client);
@@ -313,7 +313,7 @@ void msg_recv()
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
         recv(slave.sock, recvbuf, MSG_BUFFER_SIZE, 0);
-        std::cout << recvbuf << std::endl;
+        std::cout << "recv: " <<  recvbuf << std::endl;
         Json::Value root;
         Json::Reader rd;
         rd.parse(recvbuf, root);
@@ -478,7 +478,7 @@ void peerS_msg_recv(PeerNode *peer)
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
         recv(peer->sock, recvbuf, MSG_BUFFER_SIZE, 0);
-        std::cout << recvbuf << std::endl;
+        std::cout << "recv: " <<  recvbuf << std::endl;
         Json::Value root;
         Json::Reader rd;
         rd.parse(recvbuf, root);
@@ -551,7 +551,7 @@ void peerC_msg_send(PeerNode *peer)
                 {
                     //文件大小大于单个包长度，需进行拆包发送
                     root["split"] = Json::Value(true);
-                    root["pack_num"] = Json::Value(peer->current_file_trans_info->info.exatsize / ((FILE_PACKAGE_SIZE * 3) / 4));
+                    root["pack_num"] = Json::Value(peer->current_file_trans_info->info.exatsize / ((FILE_PACKAGE_SIZE * 3) / 4) + 1);
                     root["pack_size"] = Json::Value(FILE_PACKAGE_SIZE);
                 }
                 else
@@ -629,7 +629,7 @@ void peerC_msg_recv(PeerNode *peer)
     {
         memset(recvbuf, 0, MSG_BUFFER_SIZE);
         recv(peer->sock, recvbuf, MSG_BUFFER_SIZE, 0);
-        std::cout << recvbuf << std::endl;
+        std::cout << "recv: " << recvbuf << std::endl;
         Json::Value root;
         Json::Reader rd;
         rd.parse(recvbuf, root);
