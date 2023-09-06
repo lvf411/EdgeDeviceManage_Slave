@@ -54,7 +54,7 @@ bool FileInfoGet(std::string path, FileInfo *info)
 //         Json::Value json_node;
 //         json_node["client_id"] = Json::Value(node->client_id);
 //         json_node["ip"] = Json::Value(inet_ntoa(node->addr.sin_addr));
-//         json_node["listen_port"] = Json::Value(node->addr.sin_port);
+//         json_node["listen_port"] = Json::Value(node->listen_port);
 //         client.append(json_node);
 //         it++;
 //     }

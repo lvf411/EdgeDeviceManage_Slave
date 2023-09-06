@@ -78,7 +78,7 @@ int startup(){
     socklen_t addrlen = sizeof(local_addr);
     getsockname(slave.sock, (struct sockaddr *)&local_addr, &addrlen);
     slave.addr.sin_port = local_addr.sin_port;
-    slave.listen_port = htons(root["listen_port"].asInt());
+    slave.listen_port = root["listen_port"].asInt();
     slave.master_addr.sin_family = destaddr.sin_family;
     slave.master_addr.sin_addr.s_addr = inet_addr(root["master_ip"].asCString());
     slave.master_addr.sin_port = htons(root["master_port"].asInt());
@@ -95,6 +95,15 @@ int startup(){
     peer_list = LIST_HEAD_INIT(peer_list);
     //初始化文件请求队列file_req_list
     file_req_list = LIST_HEAD_INIT(file_req_list);
+
+    //向主节点发送自身监听端口的信息
+    Json::Value obj;
+    obj["listen_port"] = slave.listen_port;
+    stringstream ss;
+    Json::FastWriter fw;
+    ss << fw.write(obj);
+    send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
+
     return listen_sock;
 }
 

@@ -110,7 +110,7 @@ void subtask_input_update(int root_id, int subtask_id, std::string fname)
 }
 
 //接收文件传输socket连接线程
-void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransInfo *current_file_trans_info, int &status)
+void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransInfo *current_file_trans_info, int *status)
 {
     struct sockaddr_in client;
     socklen_t len = sizeof(client);
@@ -182,7 +182,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             //关闭文件传输连接文件描述符
             close(connect_sock);
             close(listen_sock);
-            status = SLAVE_STATUS_ORIGINAL;
+            *status = SLAVE_STATUS_ORIGINAL;
 
             //检查文件类型，响应做出更新
             switch(current_file_trans_info->file_type)
@@ -265,7 +265,7 @@ void msg_send()
                         exit(3);
                     }
                     //创建线程接收来自主节点的连接
-                    slave.file_trans_threadID = std::thread(file_trans_socket_accept, slave.sock, slave.file_trans_listen_sock, slave.current_file_trans_info, std::ref(slave.status));
+                    slave.file_trans_threadID = std::thread(file_trans_socket_accept, slave.sock, slave.file_trans_listen_sock, slave.current_file_trans_info, &(slave.status));
                     //可以接收文件
                     file_trans_allow_flag = true;
                 }
@@ -436,14 +436,14 @@ void peerS_msg_send(PeerNode *peer)
                         exit(3);
                     }
                     //创建线程接收来自对方的连接
-                    peer->file_trans_threadID = std::thread(file_trans_socket_accept, peer->sock, peer->file_trans_sock, peer->current_file_trans_info, std::ref(peer->status));
+                    peer->file_trans_threadID = std::thread(file_trans_socket_accept, peer->sock, peer->file_trans_sock, peer->current_file_trans_info, &(peer->status));
                     //可以接收文件
                     file_trans_allow_flag = true;
                 }
                 Json::Value root;
                 root["type"] = Json::Value(MSG_TYPE_FILESEND_REQ_ACK);
                 root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
-                root["src_port"] = Json::Value(ntohs(slave.listen_port));
+                root["src_port"] = Json::Value(slave.listen_port);
                 root["fname"] = Json::Value(peer->current_file_trans_info->info.fname);
                 if(file_trans_allow_flag == false)
                 {
