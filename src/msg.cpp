@@ -295,6 +295,10 @@ void msg_send()
                     send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
                     std::cout << ss.str() << std::endl;
                     slave.status = SLAVE_STATUS_FILERECV_WAIT_CONN;
+                    if(slave.file_trans_threadID.joinable())
+                    {
+                        slave.file_trans_threadID.join();
+                    }
                 }
                 break;
             }
@@ -466,6 +470,10 @@ void peerS_msg_send(PeerNode *peer)
                     send(peer->sock, ss.str().c_str(), ss.str().length(), 0);
                     std::cout << ss.str() << std::endl;
                     peer->status = PEER_STATUS_S_FILERECV_WAIT_CONN;
+                    if(peer->file_trans_threadID.joinable())
+                    {
+                        peer->file_trans_threadID.join();
+                    }
                 }
                 break;
             }
