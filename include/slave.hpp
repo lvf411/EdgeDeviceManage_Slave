@@ -62,6 +62,7 @@ struct PeerNode{
     struct list_head self;              //指向自身在从节点客户端链表中的指针
     struct list_head *head;             //指向从节点客户端链表表头
     int status;                         //分配的发送/接收线程状态，用以指示状态机运行以及部分同步问题
+    bool file_trans_flag;               //指示当前线程是否正在进行文件传输，每个连接只支持同时进行一个文件数据传输
     int file_trans_sock;                //文件传输时与从节点建立的新连接，文件发送端为文件传输sock，文件接收端为监听sock
     int file_trans_port;                //文件接收方提供的通讯端口
     FileTransInfo *current_file_trans_info;      //正在传输的文件的信息
@@ -101,6 +102,7 @@ struct Slave{
     int status;                         //从节点此时所处的状态
     std::thread master_msg_send_threadID;       //与主节点通信的消息发送线程ID
     std::thread master_msg_recv_threadID;       //与主节点通信的消息接收线程ID
+    bool file_trans_flag;               //指示当前线程是否正在进行文件传输，每个连接只支持同时进行一个文件数据传输
     int file_trans_listen_sock;         //从节点监听的数据接收文件描述符
     int file_trans_port;                //数据接收文件描述符绑定的监听端口
     FileTransInfo *current_file_trans_info;      //正在传输的文件的信息

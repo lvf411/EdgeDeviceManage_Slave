@@ -16,9 +16,6 @@
 #define FILEBUF_MAX_LENGTH 768      //768B
 #define FILE_PACKAGE_SIZE 1024      //1KB
 
-#define FILE_RECV_STATUS_NONE       0
-#define FILE_RECV_STATUS_RECVING    1
-
 struct FileInfo
 {
     std::string fname;          //文件名
