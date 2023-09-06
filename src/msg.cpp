@@ -33,6 +33,7 @@ bool key_file_check(std::string fname)
 {
     static std::string slave_subtask_sync_fname;
     static bool initflag = false;
+
     if(!initflag)
     {
         std::ofstream f;
@@ -180,6 +181,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             std::cout << ss.str() << std::endl;
             //关闭文件传输连接文件描述符
             close(connect_sock);
+
             //close(listen_sock);
             status = SLAVE_STATUS_ORIGINAL;
             file_trans_flag = false;

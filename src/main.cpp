@@ -84,6 +84,7 @@ int startup(){
     slave.master_addr.sin_port = htons(root["master_port"].asInt());
     slave.slave_id = 0;
     slave.task_num = 0;
+    task_list = LIST_HEAD_INIT(task_list);
     slave.task = &task_list;
     slave.current_task = NULL;
     slave.next_task = NULL;
