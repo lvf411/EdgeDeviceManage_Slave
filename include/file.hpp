@@ -48,7 +48,7 @@ struct FileReqNode
     std::string fname;          //请求的目标文件名
     int rootid;                 //指示该执行文件属于哪个任务
     int subtaskid;              //指示该执行文件属于 rootid 下的哪个子任务
-    list_head head;             //指向文件请求链表的头结点
+    list_head *head;            //指向文件请求链表的头结点
     list_head self;             //指向自身在链表中的指针
 };
 

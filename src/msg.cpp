@@ -58,6 +58,13 @@ bool key_file_check(std::string fname)
     return true;
 }
 
+//为文件赋予可执行权限
+void ExePermissionGrant(std::string fname)
+{
+    std::string cmd = "sudo chmod 777 " + fname;
+    system(cmd.c_str());
+}
+
 //收到主节点传来的子任务执行文件后将子任务描述节点中的exe存在标志置位
 void exeflag_update(int root_id, int subtask_id)
 {
@@ -181,8 +188,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             std::cout << ss.str() << std::endl;
             //关闭文件传输连接文件描述符
             close(connect_sock);
-
-            //close(listen_sock);
+            close(listen_sock);
             status = SLAVE_STATUS_ORIGINAL;
             file_trans_flag = false;
 
@@ -197,6 +203,8 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
                 }
                 case FILE_TYPE_EXE:
                 {
+                    //为文件赋予可执行权限
+                    ExePermissionGrant(current_file_trans_info->info.fname);
                     //主节点传来的执行文件，记录对应子任务的 exe_flag
                     exeflag_update(current_file_trans_info->dst_rootid, current_file_trans_info->dst_subtaskid);
                     break;
@@ -373,16 +381,35 @@ void msg_recv()
             case MSG_TYPE_FILEREQ_ACK:
             {
                 int ret = root["ret"].asInt();
-                if(ret == FILEREQ_ACK_WAIT)
+                switch(ret)
                 {
-                    //主节点正忙，等待后重新请求，将文件请求重新加入请求链表中
-                    FileReqNode *req_node = new FileReqNode();
-                    req_node->fname = root["fname"].asString();
-                    req_node->rootid = root["rootid"].asInt();
-                    req_node->subtaskid = root["subtaskid"].asInt();
-                    req_node->self = LIST_HEAD_INIT(req_node->self);
-                    req_node->head = file_req_list;
-                    list_add_tail(&req_node->self, &req_node->head);
+                    case FILEREQ_ACK_OK:
+                    {
+                        //主节点同意文件请求，不需要做什么，主节点会自动发起传送文件请求
+                        break;
+                    }
+                    case FILEREQ_ACK_WAIT:
+                    {
+                        //主节点正忙，等待后重新请求，将文件请求重新加入请求链表中
+                        FileReqNode *req_node = new FileReqNode();
+                        req_node->fname = root["fname"].asString();
+                        req_node->rootid = root["rootid"].asInt();
+                        req_node->subtaskid = root["subtaskid"].asInt();
+                        req_node->self = LIST_HEAD_INIT(req_node->self);
+                        req_node->head = &file_req_list;
+                        list_add_tail(&req_node->self, req_node->head);
+                        break;
+                    }
+                    case FILEREQ_ACK_ERROR:
+                    {
+                        //主节点处没有请求的目标文件，发生错误
+                        perror("filereq: master doesnot have the target file\n");
+                        break;
+                    }
+                    default:
+                    {
+                        break;
+                    }
                 }
             }
             default:

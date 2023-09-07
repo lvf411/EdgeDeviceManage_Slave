@@ -188,7 +188,7 @@ void file_req()
         ss << fw.write(root);
         send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
 
-        delete req_task;
+        delete node;
         //假若请求成功，也需时间传递文件
         sleep(3);
     }
@@ -213,7 +213,8 @@ void subtask_run()
         }
         SubTaskNode *node = list_entry(temp, SubTaskNode, self);
         int count = 0;      //计数，防止所有待执行子任务都需等待其他子任务结果时陷入死循环
-        while((node->prev_num > 0 || node->exe_flag == false) && count < slave.task_num){
+        while((node->prev_num > 0 || node->exe_flag == false) && count < slave.task_num)
+        {
             temp = temp->next;
             if(temp == slave.task)
             {
@@ -333,10 +334,15 @@ int main()
 {
     int sock = startup();
     thread slave_listen_threadID(slave_accept, sock);
+    thread file_req_threadID(file_req);
     thread subtask_run_threadID(subtask_run);
     if(slave_listen_threadID.joinable())
     {
         slave_listen_threadID.join();
+    }
+    if(file_req_threadID.joinable())
+    {
+        file_req_threadID.join();
     }
     if(subtask_run_threadID.joinable())
     {
