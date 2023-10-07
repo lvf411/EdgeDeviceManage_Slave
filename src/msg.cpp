@@ -101,8 +101,8 @@ void subtask_input_update(int root_id, int subtask_id, std::string fname)
                         SubTaskResult *t = tret->next;
                         tret->next = t->next;
                         delete t;
-                        node->prev_num--;
-                        if(node->prev_num == 0)
+                        node->cprev_num--;
+                        if(node->cprev_num == 0)
                         {
                             delete node->prev_head;
                         }

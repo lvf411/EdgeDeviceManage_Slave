@@ -223,7 +223,7 @@ void subtask_run()
         }
         SubTaskNode *node = list_entry(temp, SubTaskNode, self);
         int count = 0;      //计数，防止所有待执行子任务都需等待其他子任务结果时陷入死循环
-        while((node->prev_num > 0 || node->exe_flag == false) && count < slave.task_num)
+        while((node->cprev_num > 0 || node->exe_flag == false) && count < slave.task_num)
         {
             temp = temp->next;
             if(temp == slave.task)
@@ -311,6 +311,11 @@ void subtask_run()
         for(int i = 0; i < sendnum; i++)
         {
             tres = node->succ_head->next;
+            //跳过后继任务在同一台设备的情况
+            if(tres->client_id == slave.slave_id)
+            {
+                continue;
+            }
             int count = 0;
             int connsock = socket(AF_INET, SOCK_STREAM, 0);
             struct sockaddr_in addr;
@@ -395,7 +400,7 @@ void subtask_run()
         root["ret"] = Json::Value(true);
 
         Json::FastWriter fw;
-        std::stringstream ss;
+        ss.str("");
         ss << fw.write(root);
         send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
     }

@@ -39,9 +39,10 @@ struct SubTaskNode{
     int subtask_id;                     //标记当前子任务在整个任务中的编号
     int root_id;                        //标记整个任务在系统中的编号
     int client_id;                      //标记被分配到的设备编号
-    int prev_num;                       //标记运行当前子任务需要传来参数的前驱的数量
+    int prev_num;                       //标记子任务需要的前驱文件数量
+    int cprev_num;                      //标记运行当前子任务需要传来参数的前驱的数量
     struct SubTaskResult *prev_head;    //运行当前子任务需要传来参数的前驱的输出结果链表头节点
-    int next_num;                       //标记当前子任务需要向后传递的后继数量
+    int next_num;                       //标记子任务运行生成的后继输出文件数量
     struct SubTaskResult *succ_head;    //当前子任务需要向后传递的后继信息链表头结点
     struct list_head *head;             //任务链表表头
     struct list_head self;              //指向自身在链表中的指针

@@ -239,6 +239,7 @@ void client_task_list_descfile_parse_and_update(std::string fname)
             node->exepath = subtask[i]["exe_name"].asString();
             node->exe_flag = false;     //还未从主节点接收文件
             node->prev_num = subtask[i]["input_num"].asInt();
+            node->cprev_num = node->prev_num;
             node->prev_head = new SubTaskResult();
             node->prev_head->next = NULL;
             SubTaskResult *temp = node->prev_head;
