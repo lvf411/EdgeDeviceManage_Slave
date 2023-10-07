@@ -6,6 +6,8 @@
 #include "msg.hpp"
 
 #define INITFILE "slave_init.json"
+#define CIDFILE "containerID.txt"
+#define LOGFILEAME "logs.txt"
 #define MAX_LISTENING 1000
 #define MAX_CONN_COUNT  10
 
@@ -105,6 +107,12 @@ int startup(){
     ss << fw.write(obj);
     send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
 
+    ifs.close();
+
+    ifs.open(CIDFILE);
+    getline(ifs, slave.containerID);
+    ifs.close();
+
     return listen_sock;
 }
 
@@ -197,7 +205,9 @@ void file_req()
 //运行子任务=============================
 void subtask_run()
 {
+    int ret;
     list_head *temp = slave.task;
+    string logname = LOGFILEAME;
     while(1)
     {
         cout << endl << "task_num:" << slave.task_num << endl;
@@ -232,6 +242,67 @@ void subtask_run()
         //找到可执行子任务的节点node
         //执行子任务========================
         printf("root:%d subtask:%d processing...\n", node->root_id, node->subtask_id);
+        stringstream ss;
+        //传可执行文件
+        ss << "docker cp " << node->exepath << " " << slave.containerID << ":/home/task";
+        ret = system(ss.str().c_str());
+        int num = 0;
+        //传前驱文件
+        SubTaskResult *temp = node->prev_head->next;
+        while (num < node->prev_num)
+        {
+            ss.str("");
+            ss << "docker cp " << temp->fname << " " << slave.containerID << ":/home/task";
+            ret = system(ss.str().c_str());
+            temp = temp->next;
+            num++;
+        }
+        //执行子任务
+        ss.str("");
+        ss << "docker exec -w /home/task -d " << slave.containerID << " ./" << node->exepath;
+        ret = system(ss.str().c_str());
+        //查询子任务运行状态
+        ss.str("");
+        ss << "docker top " << slave.containerID << " > " << logname;
+        bool flag = false;
+        ifstream ifs;
+        do{
+            flag = false;
+            ret = system(ss.str().c_str());
+            cout << "ret: " << ret << endl;
+            ifs.open(logname);
+            if(!ifs.good())
+            {
+                perror("log file open error");
+                return;
+            }
+            string line;
+            while(getline(ifs, line))
+            {
+                if(line.find(node->exepath) != string::npos)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            ifs.close();
+            sleep(2);
+        }while(flag);
+        //获取后继文件
+        ss.str("");
+        temp = node->succ_head->next;
+        while (num < node->prev_num)
+        {
+            ss.str("");
+            ss << "docker cp " << slave.containerID << ":/home/task" << temp->fname << " ./";
+            ret = system(ss.str().c_str());
+            temp = temp->next;
+            num++;
+        }
+        //删除容器内子任务执行相关文件
+        ss.str("");
+        ss << "docker exec -w /home " << slave.containerID << " ./rm.sh";
+        ret = system(ss.str().c_str());
 
         //发送任务执行结果给后继
         SubTaskResult *tres;

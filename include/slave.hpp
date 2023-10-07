@@ -107,6 +107,7 @@ struct Slave{
     int file_trans_port;                //数据接收文件描述符绑定的监听端口
     FileTransInfo *current_file_trans_info;      //正在传输的文件的信息
     std::thread file_trans_threadID;    //数据接收的线程ID
+    std::string containerID;            //执行子任务的容器的编号
 };   
 
 #endif //__SLAVE_HPP
