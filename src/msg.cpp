@@ -77,6 +77,7 @@ void exeflag_update(int root_id, int subtask_id)
             if(node->subtask_id == subtask_id)
             {
                 node->exe_flag =true;
+                break;
             }
         }
         temp = temp->next;
@@ -365,6 +366,8 @@ void msg_recv()
                     slave.current_file_trans_info->base64flag = root["base64"].asBool();
                     slave.current_file_trans_info->splitflag = root["split"].asBool();
                     slave.current_file_trans_info->file_type = root["file_type"].asInt();
+                    slave.current_file_trans_info->dst_rootid = root["dst_rootid"].asInt();
+                    slave.current_file_trans_info->dst_subtaskid = root["dst_subtaskid"].asInt();
                     if(slave.current_file_trans_info->splitflag == true)
                     {
                         slave.current_file_trans_info->packnum = root["pack_num"].asInt();
@@ -463,6 +466,8 @@ void peerS_msg_send(PeerNode *peer)
                         perror("bind");
                         exit(2);
                     }
+                    std::cout << peer->file_trans_sock << std::endl;
+                    std::cout << inet_ntoa(local.sin_addr) << ":" << ntohs(local.sin_port) << std::endl;
                     if(listen(peer->file_trans_sock, 1000) < 0)
                     {
                         perror("listen");
@@ -502,6 +507,9 @@ void peerS_msg_send(PeerNode *peer)
                     if(peer->file_trans_threadID.joinable())
                     {
                         peer->file_trans_threadID.join();
+                        delete peer->current_file_trans_info;
+                        delete peer;
+                        return;
                     }
                 }
                 break;
@@ -561,6 +569,7 @@ void peerS_msg_recv(PeerNode *peer)
                         peer->current_file_trans_info->packsize = root["pack_size"].asInt();
                     }
                     peer->status = PEER_STATUS_S_FILERECV_REQ_RECV;
+                    return;
                 }
                 break;
             }
@@ -630,6 +639,10 @@ void peerC_msg_send(PeerNode *peer)
                     {
                         break;
                     }
+                    if(ret != 0)
+                    {
+                        perror("connect error:");
+                    }
                 }
                 if(count >= 10)
                 {
@@ -648,12 +661,18 @@ void peerC_msg_send(PeerNode *peer)
                     pthread_cancel(peer->msg_recv_threadID_C.native_handle());
                     return;
                 }
+                peer->sem.Wait();
                 break;
             }
             case PEER_STATUS_C_FILESEND_SENDFILE:
             {
                 peer->file_trans_threadID = std::thread(file_send, peer->file_trans_sock, peer->current_file_trans_info->info.fname);
                 peer->file_trans_threadID.join();
+                peer->sem.Wait();
+                if(peer->status == PEER_STATUS_C_FILESEND_SENDFILE)
+                {
+                    continue;
+                }
                 close(peer->file_trans_sock);
                 return;
             }
@@ -700,7 +719,24 @@ void peerC_msg_recv(PeerNode *peer)
             case MSG_TYPE_FILESEND_START:
             {
                 peer->status = PEER_STATUS_C_FILESEND_SENDFILE;
-                return;
+                peer->sem.Signal();
+                break;
+            }
+            case MSG_TYPE_FILESEND_RES:
+            {
+                int res = root["res"].asBool();
+                if(res == false)
+                {
+                    peer->status = PEER_STATUS_C_FILESEND_SENDFILE;
+                    peer->sem.Signal();
+                    break;
+                }
+                else
+                {
+                    peer->status = PEER_STATUS_C_ROOT;
+                    peer->sem.Signal();
+                    return;
+                }
             }
             default:
             {

@@ -123,10 +123,7 @@ int get_clientID(struct sockaddr_in* addr)
     {
         if(addr->sin_addr.s_addr == it->second->sin_addr.s_addr)
         {
-            if(addr->sin_port == it->second->sin_port)
-            {
-                return it->first;
-            }
+            return it->first;
         }
     }
     return -1;
@@ -143,11 +140,13 @@ void slave_accept(int sock)
 
         mutex_peer_list.lock();
         PeerNode *peerNode = new PeerNode();
+        peerNode->current_file_trans_info = new FileTransInfo();
 
         peerNode->sock = new_sock;
         peerNode->addr.sin_family = client.sin_family;
         peerNode->addr.sin_addr.s_addr = client.sin_addr.s_addr;
         peerNode->addr.sin_port = client.sin_port;
+        FileInfoInit(&peerNode->current_file_trans_info->info);
         
         //根据ip端口找到客户端id
         peerNode->client_id = get_clientID(&(peerNode->addr));
@@ -158,6 +157,7 @@ void slave_accept(int sock)
             continue;
         }
         
+        peerNode->head = &peer_list;
         peerNode->self = LIST_HEAD_INIT(peerNode->self);
         list_add_tail(&peerNode->self, &peer_list);
         peer_list_map.insert(map<int, PeerNode *>::value_type(peerNode->client_id, peerNode));
@@ -236,6 +236,7 @@ void subtask_run()
         if(count == slave.task_num)
         {
             //循环一圈并未找到可以执行的子任务
+            printf("no available task\n");
             sleep(1);
             continue;
         }
@@ -244,19 +245,21 @@ void subtask_run()
         printf("root:%d subtask:%d processing...\n", node->root_id, node->subtask_id);
         stringstream ss;
         //传可执行文件
-        ss << "docker cp " << node->exepath << " " << slave.containerID << ":/home/task";
+        ss << "docker cp " << node->exepath << " " << slave.containerID << ":/home/task/";
         ret = system(ss.str().c_str());
-        int num = 0;
+        printf("root:%d subtask:%d exe file transmission complete...\n", node->root_id, node->subtask_id);
         //传前驱文件
+        int num = 0;
         SubTaskResult *temp = node->prev_head->next;
         while (num < node->prev_num)
         {
             ss.str("");
-            ss << "docker cp " << temp->fname << " " << slave.containerID << ":/home/task";
+            ss << "docker cp " << temp->fname << " " << slave.containerID << ":/home/task/";
             ret = system(ss.str().c_str());
             temp = temp->next;
             num++;
         }
+        printf("root:%d subtask:%d prev file transmission complete...\n", node->root_id, node->subtask_id);
         //执行子任务
         ss.str("");
         ss << "docker exec -w /home/task -d " << slave.containerID << " ./" << node->exepath;
@@ -288,21 +291,25 @@ void subtask_run()
             ifs.close();
             sleep(2);
         }while(flag);
+        printf("root:%d subtask:%d exe done...\n", node->root_id, node->subtask_id);
         //获取后继文件
         ss.str("");
         temp = node->succ_head->next;
-        while (num < node->prev_num)
+        num = 0;
+        while (num < node->next_num)
         {
             ss.str("");
-            ss << "docker cp " << slave.containerID << ":/home/task" << temp->fname << " ./";
+            ss << "docker cp " << slave.containerID << ":/home/task/" << temp->fname << " ./" << temp->fname;
             ret = system(ss.str().c_str());
             temp = temp->next;
             num++;
         }
+        printf("root:%d subtask:%d succ file get...\n", node->root_id, node->subtask_id);
         //删除容器内子任务执行相关文件
         ss.str("");
         ss << "docker exec -w /home " << slave.containerID << " ./rm.sh";
         ret = system(ss.str().c_str());
+        printf("root:%d subtask:%d remove processing file...\n", node->root_id, node->subtask_id);
 
         //发送任务执行结果给后继
         SubTaskResult *tres;

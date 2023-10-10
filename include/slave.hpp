@@ -21,6 +21,7 @@
 #include "list.hpp"
 #include "file.hpp"
 #include <thread>
+#include "semaphore.hpp"
 
 #define SLAVE_STATUS_ORIGINAL               0
 #define SLAVE_STATUS_FILERECV_REQ_RECV      100
@@ -68,6 +69,7 @@ struct PeerNode{
     int file_trans_port;                //文件接收方提供的通讯端口
     FileTransInfo *current_file_trans_info;      //正在传输的文件的信息
     std::thread file_trans_threadID;    //数据传输线程的ID
+    Semaphore sem;                      //实现消息发送/接收线程同步的信号量
 };
 
 //服务端（接收端）起始状态
@@ -77,10 +79,12 @@ struct PeerNode{
 //服务端（接收端）等待来自发送端的对文件接收端口的连接
 #define PEER_STATUS_S_FILERECV_WAIT_CONN    SLAVE_STATUS_FILERECV_WAIT_CONN
 
+//客户端（发送端）起始状态
+#define PEER_STATUS_C_ROOT                  0
 //客户端（发送端）发送文件传输请求
-#define PEER_STATUS_C_FILESEND_SEND_REQ      100
+#define PEER_STATUS_C_FILESEND_SEND_REQ     100
 //客户端（发送端）等待服务端对文件传输请求的应答
-#define PEER_STATUS_C_FILESEND_WAIT_ACK      101
+#define PEER_STATUS_C_FILESEND_WAIT_ACK     101
 //客户端（发送端）收到了服务端发来的应答，建立文件传输连接
 #define PEER_STATUS_C_FILESEND_CONNECT      102
 //客户端（发送端）与服务端建立文件传输连接后等待服务端发来开始信号

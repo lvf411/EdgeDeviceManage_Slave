@@ -9,6 +9,7 @@ CMakeFiles/main.dir/src/file.cpp.o
  ../include/file.hpp
  ../include/list.hpp
  ../include/md5.hpp
+ ../include/semaphore.hpp
  ../include/slave.hpp
  /home/lf/Documents/EdgeDeviceManage_Slave/src/file.cpp
 CMakeFiles/main.dir/src/list.cpp.o
@@ -21,6 +22,7 @@ CMakeFiles/main.dir/src/main.cpp.o
  ../include/md5.hpp
  ../include/msg.hpp
  ../include/msg_type.hpp
+ ../include/semaphore.hpp
  ../include/slave.hpp
  /home/lf/Documents/EdgeDeviceManage_Slave/src/main.cpp
 CMakeFiles/main.dir/src/md5.cpp.o
@@ -33,5 +35,6 @@ CMakeFiles/main.dir/src/msg.cpp.o
  ../include/md5.hpp
  ../include/msg.hpp
  ../include/msg_type.hpp
+ ../include/semaphore.hpp
  ../include/slave.hpp
  /home/lf/Documents/EdgeDeviceManage_Slave/src/msg.cpp
