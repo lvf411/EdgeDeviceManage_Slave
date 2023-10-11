@@ -99,15 +99,8 @@ void subtask_input_update(int root_id, int subtask_id, std::string fname)
                 {
                     if(tret->next->fname.compare(fname) == 0)
                     {
-                        SubTaskResult *t = tret->next;
-                        tret->next = t->next;
-                        delete t;
                         node->cprev_num--;
-                        if(node->cprev_num == 0)
-                        {
-                            delete node->prev_head;
-                        }
-                        break;
+                        return;
                     }
                     tret = tret->next;
                 }
@@ -507,6 +500,8 @@ void peerS_msg_send(PeerNode *peer)
                     if(peer->file_trans_threadID.joinable())
                     {
                         peer->file_trans_threadID.join();
+                        close(peer->sock);
+                        list_del(&peer->self);
                         delete peer->current_file_trans_info;
                         delete peer;
                         return;

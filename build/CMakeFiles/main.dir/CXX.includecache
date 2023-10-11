@@ -108,12 +108,6 @@ thread
 semaphore.hpp
 ../include/semaphore.hpp
 
-/home/lf/Documents/EdgeDeviceManage_Slave/src/file.cpp
-file.hpp
-/home/lf/Documents/EdgeDeviceManage_Slave/src/file.hpp
-slave.hpp
-/home/lf/Documents/EdgeDeviceManage_Slave/src/slave.hpp
-
 /home/lf/Documents/EdgeDeviceManage_Slave/src/main.cpp
 slave.hpp
 /home/lf/Documents/EdgeDeviceManage_Slave/src/slave.hpp

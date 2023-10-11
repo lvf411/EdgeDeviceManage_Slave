@@ -301,14 +301,14 @@ void file_send(int sock, std::string path)
     {
         uint32_t sendlength;
         int ack = 0;
-        memset(file_readbuf, 0, FILEBUF_MAX_LENGTH);
-        memset(sendbuf, 0, FILE_PACKAGE_SIZE);
+        memset(file_readbuf, 0, FILEBUF_MAX_LENGTH + 1);
+        memset(sendbuf, 0, FILE_PACKAGE_SIZE + 1);
         memset(recvbuf, 0, 1024);
         ifs.read(file_readbuf, FILEBUF_MAX_LENGTH);
         std::cout << "fileread: " << file_readbuf << std::endl;
         Base64_Encode(file_readbuf, ifs.gcount(), sendbuf, &sendlength);
         do{
-            send(sock, sendbuf, sendlength, 0);
+            send(sock, sendbuf, strlen(sendbuf), 0);
             std::cout << "filesend: " << sendbuf << std::endl;
             recv(sock, recvbuf, 1024, 0);
             std::cout << "filerecv: " << recvbuf << std::endl;

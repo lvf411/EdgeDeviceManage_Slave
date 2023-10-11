@@ -164,7 +164,9 @@ void slave_accept(int sock)
         mutex_peer_list.unlock();
         
         peerNode->msg_send_threadID_S = thread(peerS_msg_send, peerNode);
+        peerNode->msg_send_threadID_S.detach();
         peerNode->msg_recv_threadID_S = thread(peerS_msg_recv, peerNode);
+        peerNode->msg_recv_threadID_S.detach();
         peerNode->status = PEER_STATUS_S_ORIGINAL;
         peerNode->file_trans_sock = -1;
     }
@@ -241,6 +243,9 @@ void subtask_run()
             continue;
         }
         //找到可执行子任务的节点node
+        //temp后移一位避免任务执行完成后释放node节点导致temp指向未知值
+        temp = temp->next;
+
         //执行子任务========================
         printf("root:%d subtask:%d processing...\n", node->root_id, node->subtask_id);
         stringstream ss;
@@ -386,6 +391,7 @@ void subtask_run()
                 peer->msg_send_threadID_C.join();
             }
             //释放peer资源
+            close(peer->sock);
             list_del(&peer->self);
             delete peer->current_file_trans_info;
             delete peer;
@@ -410,6 +416,27 @@ void subtask_run()
         ss.str("");
         ss << fw.write(root);
         send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
+
+        //删除任务列表中的子任务节点，并释放子任务节点node的资源
+        list_del(&node->self);
+        SubTaskResult *rtemp;
+        rtemp = node->prev_head->next;
+        while(rtemp != NULL)
+        {
+            node->prev_head->next = rtemp->next;
+            delete rtemp;
+            rtemp = node->prev_head->next;
+        }
+        delete node->prev_head;
+        rtemp = node->succ_head->next;
+        while(rtemp != NULL)
+        {
+            node->succ_head->next = rtemp->next;
+            delete rtemp;
+            rtemp = node->succ_head->next;
+        }
+        delete node->succ_head;
+        delete node;
     }
 }
 
