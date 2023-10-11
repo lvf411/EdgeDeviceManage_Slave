@@ -225,7 +225,7 @@ void subtask_run()
         }
         SubTaskNode *node = list_entry(temp, SubTaskNode, self);
         int count = 0;      //计数，防止所有待执行子任务都需等待其他子任务结果时陷入死循环
-        while((node->cprev_num > 0 || node->exe_flag == false) && count < slave.task_num)
+        while(count < slave.task_num && (node->cprev_num > 0 || node->exe_flag == false))
         {
             temp = temp->next;
             if(temp == slave.task)
@@ -317,15 +317,19 @@ void subtask_run()
         printf("root:%d subtask:%d remove processing file...\n", node->root_id, node->subtask_id);
 
         //发送任务执行结果给后继
-        SubTaskResult *tres;
-        vector<int> failtrans_succ_client_id;
+        SubTaskResult *tres = node->succ_head->next;
         int sendnum = node->next_num;
         for(int i = 0; i < sendnum; i++)
         {
-            tres = node->succ_head->next;
             //跳过后继任务在同一台设备的情况
             if(tres->client_id == slave.slave_id)
             {
+                //找到子任务列表中对应的子任务节点，更新其前驱输入文件信息，释放后继输出文件对应资源
+                subtask_input_update(node->root_id, tres->subtask_id, tres->fname);
+                node->succ_head->next = tres->next;
+                delete tres;
+                tres = node->succ_head->next;
+                node->next_num--;
                 continue;
             }
             int count = 0;
@@ -334,6 +338,7 @@ void subtask_run()
             addr.sin_family = AF_INET;
             addr.sin_port = slave.work_slave_addr.find(tres->client_id)->second->sin_port;
             addr.sin_addr.s_addr = slave.work_slave_addr.find(tres->client_id)->second->sin_addr.s_addr;
+            //暂时不对连接失败无法传送的文件进行处理======****
             while(count < MAX_CONN_COUNT)
             {
                 int ret = connect(connsock, (struct sockaddr*)&addr, sizeof(addr));
@@ -341,11 +346,7 @@ void subtask_run()
                 {
                     break;
                 }
-            }
-            if(count >= MAX_CONN_COUNT)
-            {
-                failtrans_succ_client_id.push_back(tres->client_id);
-                continue;
+                count++;
             }
 
             //建立客户端发送/接收线程发送结果文件
@@ -428,15 +429,8 @@ void subtask_run()
             rtemp = node->prev_head->next;
         }
         delete node->prev_head;
-        rtemp = node->succ_head->next;
-        while(rtemp != NULL)
-        {
-            node->succ_head->next = rtemp->next;
-            delete rtemp;
-            rtemp = node->succ_head->next;
-        }
-        delete node->succ_head;
         delete node;
+        slave.task_num--;
     }
 }
 

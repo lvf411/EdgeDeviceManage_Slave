@@ -9,6 +9,8 @@
 
 #define MSG_BUFFER_SIZE 1024
 
+void subtask_input_update(int root_id, int subtask_id, std::string fname);
+
 void msg_send();
 
 void msg_recv();
