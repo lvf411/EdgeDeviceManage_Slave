@@ -267,54 +267,58 @@ void subtask_run()
         printf("root:%d subtask:%d prev file transmission complete...\n", node->root_id, node->subtask_id);
         //执行子任务
         ss.str("");
-        ss << "docker exec -w /home/task -d " << slave.containerID << " ./" << node->exepath;
-        ret = system(ss.str().c_str());
-        //查询子任务运行状态
-        ss.str("");
-        ss << "docker top " << slave.containerID << " > " << logname;
-        bool flag = false;
-        ifstream ifs;
-        do{
-            flag = false;
-            ret = system(ss.str().c_str());
-            cout << "ret: " << ret << endl;
-            ifs.open(logname);
-            if(!ifs.good())
-            {
-                perror("log file open error");
-                return;
-            }
-            string line;
-            while(getline(ifs, line))
-            {
-                if(line.find(node->exepath) != string::npos)
-                {
-                    flag = true;
-                    break;
-                }
-            }
-            ifs.close();
-            sleep(2);
-        }while(flag);
-        printf("root:%d subtask:%d exe done...\n", node->root_id, node->subtask_id);
+        ss << "./" << node->exepath;
+        system(ss.str().c_str());
+
+        // ss.str("");
+        // ss << "docker exec -w /home/task -d " << slave.containerID << " ./" << node->exepath;
+        // ret = system(ss.str().c_str());
+        // //查询子任务运行状态
+        // ss.str("");
+        // ss << "docker top " << slave.containerID << " > " << logname;
+        // bool flag = false;
+        // ifstream ifs;
+        // do{
+        //     flag = false;
+        //     ret = system(ss.str().c_str());
+        //     cout << "ret: " << ret << endl;
+        //     ifs.open(logname);
+        //     if(!ifs.good())
+        //     {
+        //         perror("log file open error");
+        //         return;
+        //     }
+        //     string line;
+        //     while(getline(ifs, line))
+        //     {
+        //         if(line.find(node->exepath) != string::npos)
+        //         {
+        //             flag = true;
+        //             break;
+        //         }
+        //     }
+        //     ifs.close();
+        //     sleep(2);
+        // }while(flag);
+        // printf("root:%d subtask:%d exe done...\n", node->root_id, node->subtask_id);
         //获取后继文件
-        ss.str("");
-        temp = node->succ_head->next;
-        num = 0;
-        while (num < node->next_num)
-        {
-            ss.str("");
-            ss << "docker cp " << slave.containerID << ":/home/task/" << temp->fname << " ./" << temp->fname;
-            ret = system(ss.str().c_str());
-            temp = temp->next;
-            num++;
-        }
-        printf("root:%d subtask:%d succ file get...\n", node->root_id, node->subtask_id);
-        //删除容器内子任务执行相关文件
-        ss.str("");
-        ss << "docker exec -w /home " << slave.containerID << " ./rm.sh";
-        ret = system(ss.str().c_str());
-        printf("root:%d subtask:%d remove processing file...\n", node->root_id, node->subtask_id);
+        // ss.str("");
+        // temp = node->succ_head->next;
+        // num = 0;
+        // while (num < node->next_num)
+        // {
+        //     ss.str("");
+        //     ss << "docker cp " << slave.containerID << ":/home/task/" << temp->fname << " ./" << temp->fname;
+        //     ret = system(ss.str().c_str());
+        //     temp = temp->next;
+        //     num++;
+        // }
+        // printf("root:%d subtask:%d succ file get...\n", node->root_id, node->subtask_id);
+        // //删除容器内子任务执行相关文件
+        // ss.str("");
+        // ss << "docker exec -w /home " << slave.containerID << " ./rm.sh";
+        // ret = system(ss.str().c_str());
+        // printf("root:%d subtask:%d remove processing file...\n", node->root_id, node->subtask_id);
 
         //发送任务执行结果给后继
         SubTaskResult *tres = node->succ_head->next;

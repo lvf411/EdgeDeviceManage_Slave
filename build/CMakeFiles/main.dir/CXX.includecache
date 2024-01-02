@@ -108,9 +108,27 @@ thread
 semaphore.hpp
 ../include/semaphore.hpp
 
-/home/lf/Documents/EdgeDeviceManage_Slave/src/main.cpp
+/home/pi/EdgeDeviceManage_Slave/src/base64.cpp
+stdint.h
+-
+stddef.h
+-
+base64.hpp
+/home/pi/EdgeDeviceManage_Slave/src/base64.hpp
+
+/home/pi/EdgeDeviceManage_Slave/src/file.cpp
+file.hpp
+/home/pi/EdgeDeviceManage_Slave/src/file.hpp
 slave.hpp
-/home/lf/Documents/EdgeDeviceManage_Slave/src/slave.hpp
+/home/pi/EdgeDeviceManage_Slave/src/slave.hpp
+
+/home/pi/EdgeDeviceManage_Slave/src/list.cpp
+list.hpp
+/home/pi/EdgeDeviceManage_Slave/src/list.hpp
+
+/home/pi/EdgeDeviceManage_Slave/src/main.cpp
+slave.hpp
+/home/pi/EdgeDeviceManage_Slave/src/slave.hpp
 jsoncpp/json/json.h
 -
 fstream
@@ -120,5 +138,13 @@ thread
 map
 -
 msg.hpp
-/home/lf/Documents/EdgeDeviceManage_Slave/src/msg.hpp
+/home/pi/EdgeDeviceManage_Slave/src/msg.hpp
+
+/home/pi/EdgeDeviceManage_Slave/src/md5.cpp
+md5.hpp
+/home/pi/EdgeDeviceManage_Slave/src/md5.hpp
+
+/home/pi/EdgeDeviceManage_Slave/src/msg.cpp
+msg.hpp
+/home/pi/EdgeDeviceManage_Slave/src/msg.hpp
 

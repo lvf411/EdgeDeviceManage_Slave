@@ -1,0 +1,31 @@
+{
+   "client_id" : 2,
+   "ip" : "169.254.212.224",
+   "master_ip" : "169.254.12.12",
+   "master_port" : 10002,
+   "port" : 55496,
+   "subtask" : [
+      {
+         "exe_name" : "new3",
+         "input" : [
+            {
+               "client_id" : 1,
+               "fname" : "1_1_3.txt",
+               "subtask_id" : 1
+            }
+         ],
+         "input_num" : 1,
+         "output" : [
+            {
+               "client_id" : 1,
+               "fname" : "1_3_4.txt",
+               "subtask_id" : 4
+            }
+         ],
+         "output_num" : 1,
+         "root_id" : 1,
+         "subtask_id" : 3
+      }
+   ],
+   "subtask_num" : 1
+}
