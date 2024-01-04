@@ -148,7 +148,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             {
                 file_recv_threadID.join();
             }
-            while(res_md5.compare(current_file_trans_info->info.md5) != 0)
+            if(res_md5.compare(current_file_trans_info->info.md5) != 0)
             {
                 //md5检测，文件内容有误
                 //清空文件
@@ -169,6 +169,11 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
                 send(instruction_sock, ss.str().c_str(), ss.str().length(), 0);
                 std::cout << ss.str() << std::endl;
                 file_recv_threadID.join();
+                close(connect_sock);
+                close(listen_sock);
+                status = SLAVE_STATUS_ORIGINAL;
+                file_trans_flag = false;
+                return;
             }
             //md5检测，文件内容正确
             //发送确认消息

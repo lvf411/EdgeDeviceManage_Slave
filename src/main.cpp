@@ -249,22 +249,22 @@ void subtask_run()
         //执行子任务========================
         printf("root:%d subtask:%d processing...\n", node->root_id, node->subtask_id);
         stringstream ss;
-        //传可执行文件
-        ss << "docker cp " << node->exepath << " " << slave.containerID << ":/home/task/";
-        ret = system(ss.str().c_str());
-        printf("root:%d subtask:%d exe file transmission complete...\n", node->root_id, node->subtask_id);
-        //传前驱文件
-        int num = 0;
-        SubTaskResult *temp = node->prev_head->next;
-        while (num < node->prev_num)
-        {
-            ss.str("");
-            ss << "docker cp " << temp->fname << " " << slave.containerID << ":/home/task/";
-            ret = system(ss.str().c_str());
-            temp = temp->next;
-            num++;
-        }
-        printf("root:%d subtask:%d prev file transmission complete...\n", node->root_id, node->subtask_id);
+//        //传可执行文件
+//        ss << "docker cp " << node->exepath << " " << slave.containerID << ":/home/task/";
+//        ret = system(ss.str().c_str());
+//        printf("root:%d subtask:%d exe file transmission complete...\n", node->root_id, node->subtask_id);
+//        //传前驱文件
+//        int num = 0;
+//        SubTaskResult *temp = node->prev_head->next;
+//        while (num < node->prev_num)
+//        {
+//            ss.str("");
+//            ss << "docker cp " << temp->fname << " " << slave.containerID << ":/home/task/";
+//            ret = system(ss.str().c_str());
+//            temp = temp->next;
+//            num++;
+//        }
+//        printf("root:%d subtask:%d prev file transmission complete...\n", node->root_id, node->subtask_id);
         //执行子任务
         ss.str("");
         ss << "./" << node->exepath;
@@ -300,7 +300,7 @@ void subtask_run()
         //     ifs.close();
         //     sleep(2);
         // }while(flag);
-        // printf("root:%d subtask:%d exe done...\n", node->root_id, node->subtask_id);
+         printf("root:%d subtask:%d exe done...\n", node->root_id, node->subtask_id);
         //获取后继文件
         // ss.str("");
         // temp = node->succ_head->next;
