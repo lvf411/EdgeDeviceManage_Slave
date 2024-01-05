@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "/home/pi/EdgeDeviceManage_Slave/bin/main"
+			"path" : "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/bin/main"
 		}
 	],
 	"backtrace" : 1,
@@ -12,7 +12,6 @@
 		[
 			"add_executable",
 			"link_directories",
-			"target_link_libraries",
 			"include_directories"
 		],
 		"files" : 
@@ -39,12 +38,6 @@
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 40,
-				"parent" : 0
-			},
-			{
-				"command" : 3,
-				"file" : 0,
 				"line" : 28,
 				"parent" : 0
 			}
@@ -56,7 +49,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -g -g"
+					"fragment" : " -g -g  "
 				},
 				{
 					"fragment" : "-std=gnu++11"
@@ -65,8 +58,8 @@
 			"includes" : 
 			[
 				{
-					"backtrace" : 4,
-					"path" : "/home/pi/EdgeDeviceManage_Slave/include"
+					"backtrace" : 3,
+					"path" : "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/include"
 				}
 			],
 			"language" : "CXX",
@@ -96,20 +89,18 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "-L/home/pi/EdgeDeviceManage_Slave/usr/local/lib",
+				"fragment" : "-L/home/lf/Documents/EDM/EdgeDeviceManage_Slave/usr/local/lib",
 				"role" : "libraryPath"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/home/pi/EdgeDeviceManage_Slave/usr/local/lib",
+				"fragment" : "-Wl,-rpath,/home/lf/Documents/EDM/EdgeDeviceManage_Slave/usr/local/lib",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 3,
 				"fragment" : "-lpthread",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 3,
 				"fragment" : "-ljsoncpp",
 				"role" : "libraries"
 			}

@@ -47,10 +47,6 @@ bool key_file_check(std::string fname)
     {
         client_task_list_descfile_parse_and_update(fname);
     }
-    else if(fname.compare("work_client_list.json") == 0)
-    {
-        work_client_list_descfile_parse_and_update(fname);
-    }
     else
     {
         return false;
@@ -156,7 +152,7 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
                 ofstrunc.close();
                 std::ofstream ofsrewrite(current_file_trans_info->info.fname, std::ios::binary | std::ios::app);
                 res_md5.clear();
-                std::thread file_recv_threadID(file_recv, connect_sock, &(current_file_trans_info->info), std::ref(ofsrewrite), std::ref(res_md5));
+                //std::thread file_recv_threadID(file_recv, connect_sock, &(current_file_trans_info->info), std::ref(ofsrewrite), std::ref(res_md5));
                 //发送重传请求
                 root["type"] = Json::Value(MSG_TYPE_FILESEND_RES);
                 root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
@@ -194,6 +190,11 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
             //检查文件类型，响应做出更新
             switch(current_file_trans_info->file_type)
             {
+                case FILE_TYPE_WORK_CLIENT_LIST:
+                {
+                    work_client_list_descfile_parse_and_update(current_file_trans_info->info.fname);
+                    break;
+                }
                 case FILE_TYPE_KEY:
                 {
                     //为关键文件，若是则解包并更新系统信息

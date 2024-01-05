@@ -1,32 +1,32 @@
 [
 {
-  "directory": "/home/pi/EdgeDeviceManage_Slave/build",
-  "command": "/usr/bin/aarch64-linux-gnu-g++  -I/home/pi/EdgeDeviceManage_Slave/include  -g -g -std=gnu++11 -o CMakeFiles/main.dir/src/base64.cpp.o -c /home/pi/EdgeDeviceManage_Slave/src/base64.cpp",
-  "file": "/home/pi/EdgeDeviceManage_Slave/src/base64.cpp"
+  "directory": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EDM/EdgeDeviceManage_Slave/include   -g -g   -std=gnu++11 -o CMakeFiles/main.dir/src/base64.cpp.o -c /home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/base64.cpp",
+  "file": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/base64.cpp"
 },
 {
-  "directory": "/home/pi/EdgeDeviceManage_Slave/build",
-  "command": "/usr/bin/aarch64-linux-gnu-g++  -I/home/pi/EdgeDeviceManage_Slave/include  -g -g -std=gnu++11 -o CMakeFiles/main.dir/src/file.cpp.o -c /home/pi/EdgeDeviceManage_Slave/src/file.cpp",
-  "file": "/home/pi/EdgeDeviceManage_Slave/src/file.cpp"
+  "directory": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EDM/EdgeDeviceManage_Slave/include   -g -g   -std=gnu++11 -o CMakeFiles/main.dir/src/file.cpp.o -c /home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/file.cpp",
+  "file": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/file.cpp"
 },
 {
-  "directory": "/home/pi/EdgeDeviceManage_Slave/build",
-  "command": "/usr/bin/aarch64-linux-gnu-g++  -I/home/pi/EdgeDeviceManage_Slave/include  -g -g -std=gnu++11 -o CMakeFiles/main.dir/src/list.cpp.o -c /home/pi/EdgeDeviceManage_Slave/src/list.cpp",
-  "file": "/home/pi/EdgeDeviceManage_Slave/src/list.cpp"
+  "directory": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EDM/EdgeDeviceManage_Slave/include   -g -g   -std=gnu++11 -o CMakeFiles/main.dir/src/list.cpp.o -c /home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/list.cpp",
+  "file": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/list.cpp"
 },
 {
-  "directory": "/home/pi/EdgeDeviceManage_Slave/build",
-  "command": "/usr/bin/aarch64-linux-gnu-g++  -I/home/pi/EdgeDeviceManage_Slave/include  -g -g -std=gnu++11 -o CMakeFiles/main.dir/src/main.cpp.o -c /home/pi/EdgeDeviceManage_Slave/src/main.cpp",
-  "file": "/home/pi/EdgeDeviceManage_Slave/src/main.cpp"
+  "directory": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EDM/EdgeDeviceManage_Slave/include   -g -g   -std=gnu++11 -o CMakeFiles/main.dir/src/main.cpp.o -c /home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/main.cpp",
+  "file": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/main.cpp"
 },
 {
-  "directory": "/home/pi/EdgeDeviceManage_Slave/build",
-  "command": "/usr/bin/aarch64-linux-gnu-g++  -I/home/pi/EdgeDeviceManage_Slave/include  -g -g -std=gnu++11 -o CMakeFiles/main.dir/src/md5.cpp.o -c /home/pi/EdgeDeviceManage_Slave/src/md5.cpp",
-  "file": "/home/pi/EdgeDeviceManage_Slave/src/md5.cpp"
+  "directory": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EDM/EdgeDeviceManage_Slave/include   -g -g   -std=gnu++11 -o CMakeFiles/main.dir/src/md5.cpp.o -c /home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/md5.cpp",
+  "file": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/md5.cpp"
 },
 {
-  "directory": "/home/pi/EdgeDeviceManage_Slave/build",
-  "command": "/usr/bin/aarch64-linux-gnu-g++  -I/home/pi/EdgeDeviceManage_Slave/include  -g -g -std=gnu++11 -o CMakeFiles/main.dir/src/msg.cpp.o -c /home/pi/EdgeDeviceManage_Slave/src/msg.cpp",
-  "file": "/home/pi/EdgeDeviceManage_Slave/src/msg.cpp"
+  "directory": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build",
+  "command": "/home/lf/Downloads/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++   -I/home/lf/Documents/EDM/EdgeDeviceManage_Slave/include   -g -g   -std=gnu++11 -o CMakeFiles/main.dir/src/msg.cpp.o -c /home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/msg.cpp",
+  "file": "/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/msg.cpp"
 }
 ]

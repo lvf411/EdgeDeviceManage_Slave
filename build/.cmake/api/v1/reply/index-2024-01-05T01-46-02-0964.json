@@ -3,7 +3,6 @@
 	{
 		"generator" : 
 		{
-			"multiConfig" : false,
 			"name" : "Unix Makefiles"
 		},
 		"paths" : 
@@ -11,31 +10,31 @@
 			"cmake" : "/usr/bin/cmake",
 			"cpack" : "/usr/bin/cpack",
 			"ctest" : "/usr/bin/ctest",
-			"root" : "/usr/share/cmake-3.18"
+			"root" : "/usr/share/cmake-3.16"
 		},
 		"version" : 
 		{
 			"isDirty" : false,
 			"major" : 3,
-			"minor" : 18,
-			"patch" : 4,
-			"string" : "3.18.4",
+			"minor" : 16,
+			"patch" : 3,
+			"string" : "3.16.3",
 			"suffix" : ""
 		}
 	},
 	"objects" : 
 	[
 		{
-			"jsonFile" : "codemodel-v2-0b4b6c5527a6a60f07f5.json",
+			"jsonFile" : "codemodel-v2-71966aae9f94e9a558f0.json",
 			"kind" : "codemodel",
 			"version" : 
 			{
 				"major" : 2,
-				"minor" : 1
+				"minor" : 0
 			}
 		},
 		{
-			"jsonFile" : "cache-v2-613fa6fb3bd5ecc7850c.json",
+			"jsonFile" : "cache-v2-e20f8597596742811421.json",
 			"kind" : "cache",
 			"version" : 
 			{
@@ -44,7 +43,7 @@
 			}
 		},
 		{
-			"jsonFile" : "cmakeFiles-v1-9afec43d9ab8dfd046a4.json",
+			"jsonFile" : "cmakeFiles-v1-4360c865c8252218c6d8.json",
 			"kind" : "cmakeFiles",
 			"version" : 
 			{
@@ -81,7 +80,7 @@
 				"responses" : 
 				[
 					{
-						"jsonFile" : "cache-v2-613fa6fb3bd5ecc7850c.json",
+						"jsonFile" : "cache-v2-e20f8597596742811421.json",
 						"kind" : "cache",
 						"version" : 
 						{
@@ -90,19 +89,19 @@
 						}
 					},
 					{
-						"jsonFile" : "codemodel-v2-0b4b6c5527a6a60f07f5.json",
+						"jsonFile" : "codemodel-v2-71966aae9f94e9a558f0.json",
 						"kind" : "codemodel",
 						"version" : 
 						{
 							"major" : 2,
-							"minor" : 1
+							"minor" : 0
 						}
 					},
 					{
 						"error" : "unknown request kind 'toolchains'"
 					},
 					{
-						"jsonFile" : "cmakeFiles-v1-9afec43d9ab8dfd046a4.json",
+						"jsonFile" : "cmakeFiles-v1-4360c865c8252218c6d8.json",
 						"kind" : "cmakeFiles",
 						"version" : 
 						{
