@@ -321,10 +321,11 @@ void subtask_run()
         // printf("root:%d subtask:%d remove processing file...\n", node->root_id, node->subtask_id);
 
         //发送任务执行结果给后继
-        SubTaskResult *tres = node->succ_head->next;
+        SubTaskResult *tres;
         int sendnum = node->next_num;
         for(int i = 0; i < sendnum; i++)
         {
+            tres = node->succ_head->next;
             //跳过后继任务在同一台设备的情况
             if(tres->client_id == slave.slave_id)
             {
@@ -340,8 +341,10 @@ void subtask_run()
             int connsock = socket(AF_INET, SOCK_STREAM, 0);
             struct sockaddr_in addr;
             addr.sin_family = AF_INET;
-            addr.sin_port = slave.work_slave_addr.find(tres->client_id)->second->sin_port;
-            addr.sin_addr.s_addr = slave.work_slave_addr.find(tres->client_id)->second->sin_addr.s_addr;
+            cout << "tres->client_id:" << tres->client_id << endl;
+            map<int, struct sockaddr_in*>::iterator it = slave.work_slave_addr.find(tres->client_id);
+            addr.sin_port = it->second->sin_port;
+            addr.sin_addr.s_addr = it->second->sin_addr.s_addr;
             //暂时不对连接失败无法传送的文件进行处理======****
             while(count < MAX_CONN_COUNT)
             {

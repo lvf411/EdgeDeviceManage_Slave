@@ -106,6 +106,7 @@ void work_client_list_descfile_parse_and_update(std::string fname)
         {
             it->second->sin_addr.s_addr = addr->sin_addr.s_addr;
             it->second->sin_port = addr->sin_port;
+            delete addr;
         }
     }
     ifs.close();

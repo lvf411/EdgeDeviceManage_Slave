@@ -1,0 +1,46 @@
+{
+   "client_id" : 3,
+   "ip" : "169.254.212.224",
+   "master_ip" : "169.254.12.12",
+   "master_port" : 10000,
+   "port" : 45624,
+   "subtask" : [
+      {
+         "exe_name" : "1_6",
+         "input" : [
+            {
+               "client_id" : 2,
+               "fname" : "1_1.txt",
+               "subtask_id" : 1
+            },
+            {
+               "client_id" : 1,
+               "fname" : "1_2.txt",
+               "subtask_id" : 2
+            },
+            {
+               "client_id" : 2,
+               "fname" : "1_3.txt",
+               "subtask_id" : 3
+            }
+         ],
+         "input_num" : 3,
+         "output" : [
+            {
+               "client_id" : 2,
+               "fname" : "1_6.txt",
+               "subtask_id" : 7
+            },
+            {
+               "client_id" : 1,
+               "fname" : "1_6.txt",
+               "subtask_id" : 9
+            }
+         ],
+         "output_num" : 2,
+         "root_id" : 1,
+         "subtask_id" : 6
+      }
+   ],
+   "subtask_num" : 1
+}
