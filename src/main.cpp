@@ -197,6 +197,7 @@ void file_req()
         std::stringstream ss;
         ss << fw.write(root);
         send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
+	std::cout << ss.str() << std::endl;
 
         delete node;
         //假若请求成功，也需时间传递文件
@@ -414,6 +415,7 @@ void subtask_run()
         //向主节点通报子任务执行情况
         Json::Value root;
         root["type"] = Json::Value(MSG_TYPE_SUBTASK_RESULT);
+	root["slaveID"] = Json::Value(slave.slave_id);
         root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
         root["src_port"] = Json::Value(ntohs(slave.addr.sin_port));
         root["root_id"] = Json::Value(node->root_id);
