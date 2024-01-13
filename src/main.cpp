@@ -86,10 +86,10 @@ int startup(){
     slave.master_addr.sin_port = htons(root["master_port"].asInt());
     slave.slave_id = 0;
     slave.task_num = 0;
+    slave.unexecutedTaskNum = 0;
+    slave.downloadedTaskNum = 0;
     task_list = LIST_HEAD_INIT(task_list);
     slave.task = &task_list;
-    slave.current_task = NULL;
-    slave.next_task = NULL;
     slave.current_file_trans_info = new FileTransInfo();
     slave.master_msg_send_threadID = thread(msg_send);
     slave.master_msg_recv_threadID = thread(msg_recv);
@@ -197,7 +197,7 @@ void file_req()
         std::stringstream ss;
         ss << fw.write(root);
         send(slave.sock, ss.str().c_str(), ss.str().length(), 0);
-	std::cout << ss.str() << std::endl;
+	    std::cout << ss.str() << std::endl;
 
         delete node;
         //假若请求成功，也需时间传递文件
@@ -213,20 +213,30 @@ void subtask_run()
     string logname = LOGFILEAME;
     while(1)
     {
-        cout << endl << "task_num:" << slave.task_num << endl;
-        if(slave.task_num == 0)
+        if(slave.downloadedTaskNum != slave.task_num)
         {
+            static int temp = 0;
+            if(temp == 5)
+            {
+                cout << endl << "downloaded task num:" << slave.downloadedTaskNum << endl;
+            }
+            temp++;
             sleep(1);
             continue;
         }
+        if(slave.runFlag == false)
+        {
+            continue;
+        }
 
+        cout << endl << " unexecuted task num:" << slave.unexecutedTaskNum << endl;
         if(temp == slave.task)
         {
             temp = temp->next;
         }
         SubTaskNode *node = list_entry(temp, SubTaskNode, self);
         int count = 0;      //计数，防止所有待执行子任务都需等待其他子任务结果时陷入死循环
-        while(count < slave.task_num && (node->cprev_num > 0 || node->exe_flag == false))
+        while(count < slave.unexecutedTaskNum && (node->cprev_num > 0 || node->exe_flag == false))
         {
             temp = temp->next;
             if(temp == slave.task)
@@ -236,7 +246,7 @@ void subtask_run()
             node = list_entry(temp, SubTaskNode, self);
             count++;
         }
-        if(count == slave.task_num)
+        if(count == slave.unexecutedTaskNum)
         {
             //循环一圈并未找到可以执行的子任务
             printf("no available task\n");
@@ -415,7 +425,7 @@ void subtask_run()
         //向主节点通报子任务执行情况
         Json::Value root;
         root["type"] = Json::Value(MSG_TYPE_SUBTASK_RESULT);
-	root["slaveID"] = Json::Value(slave.slave_id);
+	    root["slaveID"] = Json::Value(slave.slave_id);
         root["src_ip"] = Json::Value(inet_ntoa(slave.addr.sin_addr));
         root["src_port"] = Json::Value(ntohs(slave.addr.sin_port));
         root["root_id"] = Json::Value(node->root_id);
@@ -439,7 +449,13 @@ void subtask_run()
         }
         delete node->prev_head;
         delete node;
-        slave.task_num--;
+        slave.unexecutedTaskNum--;
+        if(slave.unexecutedTaskNum == 0)
+        {
+            slave.runFlag = false;
+            slave.downloadedTaskNum = 0;
+            slave.task_num = 0;
+        }
     }
 }
 

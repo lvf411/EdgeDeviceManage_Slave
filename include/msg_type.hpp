@@ -26,5 +26,8 @@
 //发送内容为从节点子任务执行情况上报
 #define MSG_TYPE_SUBTASK_RESULT 21
 
+//发送内容为指示任务x的子任务开始执行
+#define MSG_TYPE_SUBTASK_RUN 100
+
 
 #endif //__MSG_TYPE_HPP

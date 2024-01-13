@@ -207,6 +207,12 @@ void file_trans_socket_accept(int instruction_sock, int listen_sock, FileTransIn
                     ExePermissionGrant(current_file_trans_info->info.fname);
                     //主节点传来的执行文件，记录对应子任务的 exe_flag
                     exeflag_update(current_file_trans_info->dst_rootid, current_file_trans_info->dst_subtaskid);
+                    //已下载的可执行文件数量+1
+                    slave.downloadedTaskNum++;
+                    if(slave.downloadedTaskNum == slave.task_num)
+                    {
+                        std::cout << "all subtasks have been downloaded!" << std::endl;
+                    }
                     break;
                 }
                 case FILE_TYPE_INPUT:
@@ -413,6 +419,16 @@ void msg_recv()
                         break;
                     }
                 }
+            }
+            case MSG_TYPE_SUBTASK_RUN:
+            {
+                if(slave.task_num == 0)
+                {
+                    break;
+                }
+                slave.runFlag = true;
+                slave.unexecutedTaskNum = slave.task_num;
+                break;
             }
             default:
             {
