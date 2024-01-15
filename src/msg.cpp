@@ -419,6 +419,7 @@ void msg_recv()
                         break;
                     }
                 }
+	        break;
             }
             case MSG_TYPE_SUBTASK_RUN:
             {

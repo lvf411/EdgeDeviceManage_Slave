@@ -1,3 +1,3 @@
-/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build/CMakeFiles/rebuild_cache.dir
-/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build/CMakeFiles/edit_cache.dir
-/home/lf/Documents/EDM/EdgeDeviceManage_Slave/build/CMakeFiles/main.dir
+/home/pi/EdgeDeviceManage_Slave/build/CMakeFiles/rebuild_cache.dir
+/home/pi/EdgeDeviceManage_Slave/build/CMakeFiles/edit_cache.dir
+/home/pi/EdgeDeviceManage_Slave/build/CMakeFiles/main.dir

@@ -108,7 +108,17 @@ thread
 semaphore.hpp
 ../include/semaphore.hpp
 
-/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/msg.cpp
+/home/pi/EdgeDeviceManage_Slave/src/main.cpp
+slave.hpp
+/home/pi/EdgeDeviceManage_Slave/src/slave.hpp
+jsoncpp/json/json.h
+-
+fstream
+-
+thread
+-
+map
+-
 msg.hpp
-/home/lf/Documents/EDM/EdgeDeviceManage_Slave/src/msg.hpp
+/home/pi/EdgeDeviceManage_Slave/src/msg.hpp
 

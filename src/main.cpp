@@ -93,6 +93,7 @@ int startup(){
     slave.current_file_trans_info = new FileTransInfo();
     slave.master_msg_send_threadID = thread(msg_send);
     slave.master_msg_recv_threadID = thread(msg_recv);
+    slave.runFlag = false;
 
     //初始化peer_list
     peer_list = LIST_HEAD_INIT(peer_list);
@@ -455,6 +456,7 @@ void subtask_run()
             slave.runFlag = false;
             slave.downloadedTaskNum = 0;
             slave.task_num = 0;
+            std::cout << "all subtasks done!" << std::endl;
         }
     }
 }

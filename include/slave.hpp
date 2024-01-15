@@ -113,7 +113,7 @@ struct Slave{
     FileTransInfo *current_file_trans_info;      //正在传输的文件的信息
     std::thread file_trans_threadID;    //数据接收的线程ID
     std::string containerID;            //执行子任务的容器的编号
-    bool runFlag = false;               //子任务运行标志
+    bool runFlag;                       //子任务运行标志
 };   
 
 #endif //__SLAVE_HPP
