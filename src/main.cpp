@@ -4,6 +4,7 @@
 #include <thread>
 #include <map>
 #include "msg.hpp"
+#include <chrono>
 
 #define INITFILE "slave_init.json"
 #define CIDFILE "containerID.txt"
@@ -280,7 +281,21 @@ void subtask_run()
         //执行子任务
         ss.str("");
         ss << "./" << node->exepath;
+        auto currenttime = std::chrono::system_clock::now();
+        auto timestamp = std::chrono::system_clock::to_time_t(currenttime);
+        auto timestampMS = std::chrono::duration_cast<std::chrono::milliseconds>(currenttime.time_since_epoch()).count();
+        char buffer[80];
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&timestamp));
+        std::cout << "start timestampMS: " << timestampMS << std::endl;
+        std::cout << "start timestamp: " << buffer << std::endl;
+
         system(ss.str().c_str());
+        currenttime = std::chrono::system_clock::now();
+        timestamp = std::chrono::system_clock::to_time_t(currenttime);
+        timestampMS = std::chrono::duration_cast<std::chrono::milliseconds>(currenttime.time_since_epoch()).count();
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&timestamp));
+        std::cout << "end   timestampMS: " << timestampMS << std::endl;
+        std::cout << "end   timestamp: " << buffer << std::endl;
 
         // ss.str("");
         // ss << "docker exec -w /home/task -d " << slave.containerID << " ./" << node->exepath;
